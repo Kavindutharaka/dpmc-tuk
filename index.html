@@ -171,17 +171,6 @@
       transform: translateZ(50px);
     }
 
-    .engine-bar-container {
-      position: absolute;
-      top: 40px;
-      right: 40px;
-      display: flex;
-      align-items: center;
-      z-index: 5;
-      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
-      transform: translateZ(50px);
-    }
-
     .bar-icon {
       width: 70px;
       height: 70px;
@@ -200,10 +189,6 @@
 
     .fuel-icon {
       background-image: url("./fuel.png");
-    }
-
-    .engine-icon {
-      background-image: url("./gear.png");
     }
 
     .bar {
@@ -244,15 +229,6 @@
           #44ff44 100%);
       box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3),
                   0 0 20px rgba(68, 255, 68, 0.5);
-    }
-
-    .engine-fill {
-      background: linear-gradient(90deg,
-          #ff4444 0%,
-          #ff8844 50%,
-          #44ff44 100%);
-      box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3),
-                  0 0 20px rgba(255, 136, 68, 0.5);
     }
 
     .sound-icon {
@@ -494,12 +470,6 @@
             <div class="bar-fill fuel-fill" id="fuelBar"></div>
           </div>
         </div>
-        <div class="engine-bar-container">
-          <div class="bar-icon engine-icon"></div>
-          <div class="bar">
-            <div class="bar-fill engine-fill" id="engineBar"></div>
-          </div>
-        </div>
         <div class="sound-icon" title="Toggle Sound"></div>
         <div ng-click="pause ? resumeGame() : pauseGame()" class="break-icon" title="Toggle Sound"></div>
         <canvas id="gameCanvas"></canvas>
@@ -514,6 +484,14 @@
           <img style="width: 80px;" src="./icon/war.png" />
           <p>{{warn_msg}}</p>
           <button ng-click="resumeGame()" class="tryAgainBtn">Understood</button>
+        </div>
+
+        <!-- Wrong Part Alert Modal -->
+        <div ng-show="showWrongPartAlert" class="gameOverModal" style="border-color: #ff4444;">
+          <h2 style="color: #ff4444;">NOT GENUINE!</h2>
+          <img ng-src="{{wrongPartImage}}" style="width: 200px; margin: 20px 0;" />
+          <p style="font-size: 40px;">This is not a genuine spare part!</p>
+          <p style="font-size: 36px; color: #ff4444;">-5 Marks</p>
         </div>
 
       </div>
