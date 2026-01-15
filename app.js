@@ -486,7 +486,7 @@ app.controller(
       const rightRoadEdge = centerX + roadWidthAtY / 2;
 
       const totalStripeWidth = roadWidthAtY - 40;
-      const stripeWidth = totalStripeWidth / (yellowLine.stripeCount * 2 - 1);
+      const stripeWidth = totalStripeWidth / yellowLine.stripeCount;
 
       // Add 3D shadow to yellow lines
       ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
@@ -495,8 +495,8 @@ app.controller(
       ctx.shadowOffsetY = 4;
 
       for (let i = 0; i < yellowLine.stripeCount; i++) {
-        const stripeXStart = leftRoadEdge + 20 + i * (stripeWidth + yellowLine.stripeGap);
-        const stripeXEnd = stripeXStart + stripeWidth;
+        const stripeXStart = leftRoadEdge + 20 + i * stripeWidth;
+        const stripeXEnd = stripeXStart + (stripeWidth - yellowLine.stripeGap);
 
         // Gradient for 3D effect
         const yellowGradient = ctx.createLinearGradient(
