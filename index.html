@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Bajaj</title>
+  <script type="text/javascript" src="sup/swiped-events.js"></script>
+
+  <script src="./sup/angular.min.js"></script>
+  <script src="app.js?t=202515"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #000;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .game-wrapper {
+      width: 100vw;
+      height: 100vh;
+      max-width: 720px;
+      max-height: 1080px;
+      position: relative;
+      background: #000;
+      margin: 0 auto;
+    }
+
+    #user_form {
+      position: relative;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 12vh 3vw;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      /* justify-content: center; */
+      align-items: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    #logo {
+      width: 15vw;
+      height: 15vw;
+      max-width: 100px;
+      max-height: 100px;
+      min-width: 60px;
+      min-height: 60px;
+      margin-bottom: 4vh;
+    }
+
+    .user-form-details {
+      display: flex;
+      flex-direction: column;
+      gap: 1vh;
+      align-items: center;
+      width: 100%;
+    }
+
+    .form-label {
+      margin-bottom: 1vh;
+      font-size: 4vw;
+      max-font-size: 18px;
+      min-font-size: 14px;
+    }
+
+    .form-input {
+      padding: 3vw;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      background-color: #333;
+      color: white;
+      width: 80vw;
+      max-width: 300px;
+      margin-bottom: 2vh;
+      font-size: 4vw;
+      max-font-size: 16px;
+      min-font-size: 14px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+
+    .user-form-button {
+      padding-top: 2vh;
+    }
+
+    button {
+      padding: 3vw 6vw;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 4vw;
+      max-font-size: 18px;
+      min-font-size: 16px;
+      cursor: pointer;
+      min-height: 50px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #gameContainer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      /* display: flex;
+        justify-content: center;
+        align-items: center; */
+    }
+
+    #gameCanvas {
+      display: block;
+      touch-action: none;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .fuel-bar-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .engine-bar-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .bar-icon {
+      width: 30px;
+      height: 30px;
+      margin-right: 8px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .fuel-icon {
+      background-image: url("./fuel.png");
+    }
+
+    .engine-icon {
+      background-image: url("./gear.png");
+    }
+
+    .bar {
+      width: 80px;
+      height: 20px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+      border-radius: 8px;
+    }
+
+    .fuel-fill {
+      background: linear-gradient(90deg,
+          #ff4444 0%,
+          #ffff44 50%,
+          #44ff44 100%);
+    }
+
+    .engine-fill {
+      background: linear-gradient(90deg,
+          #ff4444 0%,
+          #ff8844 50%,
+          #44ff44 100%);
+    }
+
+    .sound-icon {
+      position: absolute;
+      top: 40%;
+      left: 20px;
+      width: 45px;
+      height: 45px;
+      background-image: url("./icon/volume.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      z-index: 10;
+      cursor: pointer;
+      background-color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      z-index: 10;
+    }
+
+    .break-icon {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 65px;
+      height: 65px;
+      background-image: url("./icon/brake.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      z-index: 10;
+      cursor: pointer;
+      background-color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      z-index: 10;
+    }
+
+    .break-icon:hover {
+      background-color: rgb(195, 192, 192);
+    }
+
+    .sound-icon.muted {
+      background-image: url('./icon/mute.png');
+    }
+
+    #gameOverModal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      display: none;
+      z-index: 10;
+      width: 80vw;
+      max-width: 400px;
+    }
+
+    #gameOverModal h2 {
+      margin: 0 0 4vw 0;
+      color: #ff4444;
+      font-size: 8vw;
+      max-font-size: 32px;
+      min-font-size: 24px;
+    }
+
+    #gameOverModal p {
+      margin: 2vw 0;
+      font-size: 4vw;
+      max-font-size: 18px;
+      min-font-size: 14px;
+    }
+
+    #tryAgainBtn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 4vw 8vw;
+      font-size: 4vw;
+      max-font-size: 18px;
+      min-font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 4vw;
+      min-height: 50px;
+    }
+
+    #tryAgainBtn:hover {
+      background: #45a049;
+    }
+
+    #gameOverModal2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      padding: 6vw;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 999999999999999999;
+    }
+
+    @media screen and (max-width: 480px) {
+      .form-label {
+        font-size: 16px;
+      }
+
+      .form-input {
+        font-size: 16px;
+        padding: 12px;
+      }
+
+      .button {
+        font-size: 16px;
+        padding: 12px 24px;
+      }
+
+      .bar {
+        width: 60px;
+        height: 16px;
+      }
+
+      .bar-icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    @media screen and (min-width: 768px) {
+      .form-label {
+        font-size: 18px;
+      }
+
+      .form-input {
+        font-size: 16px;
+        width: 60vw;
+        max-width: 350px;
+      }
+
+      button {
+        font-size: 18px;
+      }
+    }
+
+    @media screen and (min-width: 1024px) {
+      body {
+        background: #222;
+      }
+
+      .game-wrapper {
+        border-radius: 10px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+      }
+
+      .form-label {
+        font-size: 18px;
+      }
+
+      .form-input {
+        font-size: 16px;
+        width: 300px;
+        padding: 12px;
+      }
+
+      button {
+        font-size: 18px;
+        padding: 15px 30px;
+      }
+
+      #logo {
+        width: 80px;
+        height: 80px;
+      }
+
+      .bar {
+        width: 100px;
+        height: 24px;
+      }
+
+      .bar-icon {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
+    .gameOverModal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 10;
+      width: 80vw;
+      max-width: 400px;
+    }
+
+    .gameOverModal h2 {
+      margin: 0 0 4vw 0;
+      color: #ff4444;
+      font-size: 8vw;
+      max-font-size: 32px;
+      min-font-size: 24px;
+    }
+
+    .gameOverModal p {
+      margin: 2vw 0;
+      font-size: 4vw;
+      max-font-size: 18px;
+      min-font-size: 14px;
+    }
+
+    .tryAgainBtn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 4vw 8vw;
+      font-size: 4vw;
+      max-font-size: 18px;
+      min-font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 4vw;
+      min-height: 50px;
+    }
+
+    .tryAgainBtn:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false" ng-app="app"
+  ng-controller="HomeCtrl">
+  <div ng-show="page == 1">
+    <div class="game-wrapper">
+      <div id="user_form">
+        <div class="user-form-logo">
+          <img id="logo" src="logo.jpeg" />
+        </div>
+        <div class="user-form-details">
+          <label class="form-label">නම</label>
+          <input type="text" class="form-input" />
+          <label class="form-label">දු අංකය</label>
+          <input type="text" class="form-input" />
+        </div>
+        <div class="user-form-button">
+          <button type="button" ng-click="next()">Game Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-show="page == 2">
+    <img src="logo.jpeg" />
+    <h2>Loading ..</h2>
+  </div>
+  <div ng-show="page == 3">
+    <div class="game-wrapper">
+      <div id="gameContainer">
+        <div class="fuel-bar-container">
+          <div class="bar-icon fuel-icon"></div>
+          <div class="bar">
+            <div class="bar-fill fuel-fill" id="fuelBar"></div>
+          </div>
+        </div>
+        <div class="engine-bar-container">
+          <div class="bar-icon engine-icon"></div>
+          <div class="bar">
+            <div class="bar-fill engine-fill" id="engineBar"></div>
+          </div>
+        </div>
+        <div class="sound-icon" title="Toggle Sound"></div>
+        <div ng-click="pause ? resumeGame() : pauseGame()" class="break-icon" title="Toggle Sound"></div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameOverModal">
+          <h2>GAME OVER!</h2>
+          <p>{{msg}}</p>
+          <p id="finalScore">Final Score: 0000</p>
+          <button id="tryAgainBtn">Try Again</button>
+        </div>
+        <div ng-show="crossLnHit" class="gameOverModal">
+          <h2>Warning!</h2>
+          <img style="width: 80px;" src="./icon/war.png" />
+          <p>{{warn_msg}}</p>
+          <button ng-click="resumeGame()" class="tryAgainBtn">Understood</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!--<div ng-hide="true">
+        <img src="barrier.png" />
+        <img src="center-tuk.png" />
+        <img src="fuel.png" />
+        <img src="gear.png" />
+    
+    </div>-->
+</body>
+
+</html>
