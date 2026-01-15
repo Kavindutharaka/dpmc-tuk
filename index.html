@@ -434,6 +434,42 @@
       transform: translateY(0);
       box-shadow: 0 10px 30px rgba(76, 175, 80, 0.5);
     }
+
+    /* Appreciation Modal Styles */
+    .appreciation-modal {
+      border: 3px solid #4caf50 !important;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8),
+                  inset 0 0 50px rgba(76, 175, 80, 0.2) !important;
+      background: linear-gradient(135deg, rgba(0, 50, 0, 0.95) 0%, rgba(26, 76, 46, 0.95) 100%) !important;
+    }
+
+    .appreciation-modal h2 {
+      color: #4caf50 !important;
+      font-size: 70px !important;
+      margin-bottom: 30px !important;
+      text-shadow: 0 8px 20px rgba(76, 175, 80, 0.8),
+                   0 0 40px rgba(76, 175, 80, 0.5) !important;
+      animation: appreciationPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes appreciationPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .success-icon {
+      font-size: 150px;
+      color: #4caf50;
+      font-weight: bold;
+      text-shadow: 0 0 40px rgba(76, 175, 80, 0.8);
+      animation: successBounce 0.6s ease-in-out;
+      margin: 20px 0;
+    }
+
+    @keyframes successBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
   </style>
 </head>
 
@@ -492,6 +528,12 @@
           <img ng-src="{{wrongPartImage}}" style="width: 200px; margin: 20px 0;" />
           <p style="font-size: 40px;">This is not a genuine spare part!</p>
           <p style="font-size: 36px; color: #ff4444;">-5 Marks</p>
+        </div>
+
+        <!-- Appreciation Modal (Positive Messages) -->
+        <div ng-show="showAppreciation" class="gameOverModal appreciation-modal">
+          <h2>{{appreciation_msg}}</h2>
+          <div class="success-icon">✓</div>
         </div>
 
       </div>
