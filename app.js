@@ -86,8 +86,8 @@ app.controller(
         trees.push({
           type: Math.floor(Math.random() * 3),
           x: Math.random() * (canvas.width * 0.25),
-          y: 200 + Math.random() * 100,
-          initialY: 200 + Math.random() * 100,
+          y: 450 + Math.random() * 100,
+          initialY: 450 + Math.random() * 100,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
           size: 40 + Math.random() * 20,
@@ -100,8 +100,8 @@ app.controller(
         trees.push({
           type: Math.floor(Math.random() * 3),
           x: canvas.width * 0.75 + Math.random() * (canvas.width * 0.25),
-          y: 200 + Math.random() * 100,
-          initialY: 200 + Math.random() * 100,
+          y: 450 + Math.random() * 100,
+          initialY: 450 + Math.random() * 100,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
           size: 40 + Math.random() * 20,
@@ -114,8 +114,8 @@ app.controller(
     function spawnNewTree(side) {
       const newTree = {
         type: Math.floor(Math.random() * 3),
-        y: 150 + Math.random() * 50,
-        initialY: 150 + Math.random() * 50,
+        y: 400 + Math.random() * 50, // Spawn near horizon
+        initialY: 400 + Math.random() * 50,
         speed: 0.3 + Math.random() * 0.4,
         size: 40 + Math.random() * 20,
         side: side,
@@ -190,11 +190,11 @@ app.controller(
       const sortedTrees = [...trees].sort((a, b) => a.y - b.y);
 
       sortedTrees.forEach((tree) => {
-        if (tree.y > 200) {
+        if (tree.y > 450) { // Start showing trees near road top
           const treeImg = treeImages[tree.type];
           if (treeImg && treeImg.complete) {
             const size = tree.currentSize || tree.size;
-            const alpha = Math.min(1, (tree.y - 200) / 100);
+            const alpha = Math.min(1, (tree.y - 450) / 100); // Fade in from road top
 
             // Draw 3D shadow for trees
             ctx.globalAlpha = alpha * 0.4;
@@ -269,7 +269,7 @@ app.controller(
       if (!gameRunning || paused) return;
 
       const lane = Math.random() < 0.5 ? "left" : "right";
-      const startY = 500;
+      const startY = 450; // Spawn slightly before road top for smooth appearance
 
       const minDistance = 100;
       const hasOverlap = items.some(
@@ -387,7 +387,7 @@ app.controller(
     function drawMiddleLine() {
       const centerX = canvas.width / 2;
       const height = lineHeight;
-      let segmentY = 370 - height + offset;
+      let segmentY = 500 - height + offset; // Start from road top at Y=500
 
       let topWidth = 8;
       let bottomWidth = topWidth + 3;
@@ -433,7 +433,7 @@ app.controller(
       const roadBottom = canvas.width;
       const roadTop = canvas.width * 0.4;
       const roadStart = canvas.height;
-      const roadEnd = 250;
+      const roadEnd = 500; // Match road top position
 
       ctx.strokeStyle = "#FFFFFF";
       ctx.lineWidth = 6;
