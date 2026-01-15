@@ -21,13 +21,18 @@ app.controller(
     const tryAgainBtn = document.getElementById("tryAgainBtn");
 
     let fuel = 100;
-    let engine = 100;
     const fuelDecreaseRate = 0.1;
-    const engineDecreaseRate = 0.09;
     const fuelBar = document.getElementById("fuelBar");
-    const engineBar = document.getElementById("engineBar");
     let lowFuelWarning = false;
-    let lowEngineWarning = false;
+
+    // Game timer (60 seconds)
+    let gameTimer = 60;
+    let timerInterval = null;
+
+    // Marks system
+    let marks = 0;
+    let showGoldenAnimation = false;
+    let goldenAnimationTimer = 0;
 
     const lineSpacing = 140;
     const lineHeight = 120;
@@ -45,13 +50,46 @@ app.controller(
     var tuk_sound = new Audio("./audio/tuk_sound.mp3");
 
     const items = [];
-    const itemTypes = ["barrier", "tool", "fuel", "logo"];
+
+    // Genuine spare parts (correct items - add marks)
+    const genuinePartsPaths = [
+      "./genuine/part1.png",
+      "./genuine/part2.png",
+      "./genuine/part3.png",
+      "./genuine/part4.png",
+      "./genuine/part5.png"
+    ];
+
+    // Non-genuine spare parts (incorrect items - decrease marks)
+    const nonGenuinePartsPaths = [
+      "./nongenuine/part1.png",
+      "./nongenuine/part2.png",
+      "./nongenuine/part3.png",
+      "./nongenuine/part4.png",
+      "./nongenuine/part5.png"
+    ];
+
+    // Load genuine parts images
+    const genuinePartsImages = [];
+    genuinePartsPaths.forEach(path => {
+      const img = new Image();
+      img.src = path;
+      genuinePartsImages.push(img);
+    });
+
+    // Load non-genuine parts images
+    const nonGenuinePartsImages = [];
+    nonGenuinePartsPaths.forEach(path => {
+      const img = new Image();
+      img.src = path;
+      nonGenuinePartsImages.push(img);
+    });
+
+    const itemTypes = ["barrier", "fuel", "genuine", "nongenuine"];
     const spawnInterval = 1500;
     const itemImages = {
       barrier: new Image(),
-      tool: new Image(),
       fuel: new Image(),
-      logo: new Image(),
     };
     const tukImg = new Image();
     const tuk = {
@@ -237,15 +275,12 @@ app.controller(
     }
 
     itemImages.barrier.src = "./barrier.png";
-    itemImages.tool.src = "./gear.png";
     itemImages.fuel.src = "./fuel.png";
-    itemImages.logo.src = "./logo.jpeg";
 
     tukImg.src = "./center-tuk.png";
 
     function updateBars() {
       fuelBar.style.width = fuel + "%";
-      engineBar.style.width = engine + "%";
     }
 
     function getLaneX(y, lane) {
@@ -284,15 +319,22 @@ app.controller(
       }
 
       let type;
+      let partIndex = 0;
+
       if (fuel < 30 && !lowFuelWarning) {
         type = "fuel";
-      } else if (engine < 30 && !lowEngineWarning) {
-        type = "tool";
       } else {
         const availableTypes = doubleLineActive || barrierCooldown > 0
           ? itemTypes.filter(t => t !== "barrier")
           : itemTypes;
         type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
+        // If it's a genuine or non-genuine part, pick a random image
+        if (type === "genuine") {
+          partIndex = Math.floor(Math.random() * genuinePartsImages.length);
+        } else if (type === "nongenuine") {
+          partIndex = Math.floor(Math.random() * nonGenuinePartsImages.length);
+        }
       }
 
       const x = getLaneX(startY, lane);
@@ -303,6 +345,7 @@ app.controller(
         x: getLaneX(-30, lane),
         width: 100,
         height: 100,
+        partIndex: partIndex, // Store which image to use for parts
       });
     }, spawnInterval);
 
@@ -594,19 +637,19 @@ app.controller(
 
     function drawScore() {
       ctx.textAlign = "center";
-      const scoreText = score.toString().padStart(4, "0");
 
-      // 3D depth layers for score
+      // Draw MARKS at the center top
+      const marksText = marks.toString().padStart(3, "0");
       ctx.font = "bold 80px Arial";
 
       // Bottom shadow layer
       ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-      ctx.fillText(scoreText, canvas.width / 2 + 6, 136);
+      ctx.fillText(marksText, canvas.width / 2 + 6, 136);
 
       // Dark outline
       ctx.strokeStyle = "#000000";
       ctx.lineWidth = 8;
-      ctx.strokeText(scoreText, canvas.width / 2, 130);
+      ctx.strokeText(marksText, canvas.width / 2, 130);
 
       // Gradient fill for 3D effect
       const scoreGradient = ctx.createLinearGradient(
@@ -617,12 +660,77 @@ app.controller(
       scoreGradient.addColorStop(0.5, "#FFFFFF");
       scoreGradient.addColorStop(1, "#FFD700");
       ctx.fillStyle = scoreGradient;
-      ctx.fillText(scoreText, canvas.width / 2, 130);
+      ctx.fillText(marksText, canvas.width / 2, 130);
 
       // Top highlight
       ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
       ctx.lineWidth = 2;
-      ctx.strokeText(scoreText, canvas.width / 2 - 1, 128);
+      ctx.strokeText(marksText, canvas.width / 2 - 1, 128);
+
+      // Draw TIMER at the top left (next to fuel bar)
+      const timerText = gameTimer.toString() + "s";
+      ctx.textAlign = "left";
+      ctx.font = "bold 60px Arial";
+
+      // Shadow
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillText(timerText, 50, 200);
+
+      // Outline
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 6;
+      ctx.strokeText(timerText, 50, 195);
+
+      // Fill
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(timerText, 50, 195);
+    }
+
+    function drawGoldenAnimation() {
+      if (showGoldenAnimation && goldenAnimationTimer > 0) {
+        goldenAnimationTimer--;
+
+        // Calculate pulse scale
+        const scale = 1 + (Math.sin(goldenAnimationTimer * 0.3) * 0.2);
+
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.font = `bold ${100 * scale}px Arial`;
+
+        // Golden glow
+        ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
+        ctx.shadowBlur = 40;
+
+        // Draw +10
+        const alpha = goldenAnimationTimer / 60;
+        ctx.globalAlpha = alpha;
+
+        // Shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillText("+10", canvas.width / 2 + 8, canvas.height / 2 + 8);
+
+        // Outline
+        ctx.strokeStyle = "#8B4500";
+        ctx.lineWidth = 8;
+        ctx.strokeText("+10", canvas.width / 2, canvas.height / 2);
+
+        // Golden gradient
+        const goldGradient = ctx.createLinearGradient(
+          canvas.width / 2 - 50, canvas.height / 2 - 50,
+          canvas.width / 2 + 50, canvas.height / 2 + 50
+        );
+        goldGradient.addColorStop(0, "#FFD700");
+        goldGradient.addColorStop(0.5, "#FFA500");
+        goldGradient.addColorStop(1, "#FFD700");
+        ctx.fillStyle = goldGradient;
+        ctx.fillText("+10", canvas.width / 2, canvas.height / 2);
+
+        ctx.restore();
+
+        if (goldenAnimationTimer <= 0) {
+          showGoldenAnimation = false;
+        }
+      }
     }
 
     function checkCollision(item, tuk) {
@@ -641,9 +749,18 @@ app.controller(
           item.x = getLaneX(item.y, item.lane);
         }
 
-        const img = itemImages[item.type];
+        let img = null;
 
-        if (img.complete) {
+        // Get the correct image based on item type
+        if (item.type === "genuine") {
+          img = genuinePartsImages[item.partIndex];
+        } else if (item.type === "nongenuine") {
+          img = nonGenuinePartsImages[item.partIndex];
+        } else {
+          img = itemImages[item.type];
+        }
+
+        if (img && img.complete) {
           const size = 110;  // Increased size for better visibility on kiosk
 
           // Draw 3D shadow for items
@@ -656,6 +773,12 @@ app.controller(
           if (item.type !== "barrier") {
             ctx.shadowColor = "rgba(255, 200, 50, 0.6)";
             ctx.shadowBlur = 25;
+          }
+
+          // Add green glow for genuine parts
+          if (item.type === "genuine") {
+            ctx.shadowColor = "rgba(50, 255, 50, 0.8)";
+            ctx.shadowBlur = 30;
           }
 
           ctx.drawImage(img, item.x - size / 2, item.y - size / 2, size, size);
@@ -688,13 +811,34 @@ app.controller(
               lowFuelWarning = false;
               item.collected = true;
               $scope.tel();
-            } else if (item.type === "tool") {
-              engine = 100;
-              lowEngineWarning = false;
+            } else if (item.type === "genuine") {
+              // Correct genuine part - add marks and show golden animation
+              marks += 10;
               item.collected = true;
-            } else if (item.type === "logo") {
-              score += 100;
+              showGoldenAnimation = true;
+              goldenAnimationTimer = 60; // Show for 1 second (60 frames)
+              console.log("Genuine part collected! +10 marks");
+            } else if (item.type === "nongenuine") {
+              // Wrong non-genuine part - subtract marks and show alert
+              marks = Math.max(0, marks - 5);
               item.collected = true;
+
+              // Show alert modal
+              $timeout(function() {
+                $scope.wrongPartImage = nonGenuinePartsPaths[item.partIndex];
+                $scope.showWrongPartAlert = true;
+                paused = true;
+                $scope.pause = true;
+                sindu.pause();
+                tuk_sound.pause();
+
+                // Auto close after 2 seconds
+                $timeout(function() {
+                  $scope.showWrongPartAlert = false;
+                  $scope.resumeGame();
+                }, 2000);
+              });
+              console.log("Non-genuine part collected! -5 marks");
             } else if (item.type === "barrier") {
               $scope.msg = "බාධකයක හැපුණා!"; // Barrier collision message
               gameOver();
@@ -757,7 +901,15 @@ app.controller(
 
     function gameOver() {
       gameRunning = false;
-      finalScoreEl.textContent = `Final Score: ${score.toString().padStart(4, "0")}`;
+
+      // Stop timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      // Show final marks instead of score
+      finalScoreEl.textContent = `Final Marks: ${marks}`;
       gameOverModal.style.display = "block";
       $timeout(function () {
         $scope.crossLnHit = false;
@@ -770,11 +922,9 @@ app.controller(
     function resetGame() {
       gameRunning = true;
       game_speed = 5;
-      score = 0;
+      marks = 0;
       fuel = 100;
-      engine = 100;
       lowFuelWarning = false;
-      lowEngineWarning = false;
       items.length = 0;
       trees.length = 0;
       tuk.lane = "left";
@@ -789,7 +939,31 @@ app.controller(
       yellowLinePaused = false;
       inSafeRange = false;
       yellowLineSpawned = false;
+      showGoldenAnimation = false;
+      goldenAnimationTimer = 0;
       $scope.msg = ""; // Clear game over message
+      $scope.showWrongPartAlert = false;
+
+      // Reset timer to 60 seconds
+      gameTimer = 60;
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
+      // Start 60 second countdown
+      timerInterval = setInterval(() => {
+        if (gameRunning && !paused) {
+          gameTimer--;
+          if (gameTimer <= 0) {
+            gameTimer = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            $scope.msg = "Time's up!";
+            gameOver();
+          }
+        }
+      }, 1000);
+
       $timeout(function () {
         $scope.crossLnHit = false;
         $scope.warn_msg = "";
@@ -1015,32 +1189,30 @@ app.controller(
       drawItems();
       drawTuk();
       drawScore();
+      drawGoldenAnimation(); // Draw golden animation on top
 
       if (gameRunning) {
         fuel = Math.max(0, fuel - fuelDecreaseRate);
-        engine = Math.max(0, engine - engineDecreaseRate);
 
         if (fuel < 30) lowFuelWarning = true;
-        if (engine < 30) lowEngineWarning = true;
 
         updateBars();
 
-        if (score === 100 && !yellowLine && !yellowLineSpawned) {
+        // Spawn yellow line based on marks instead of score
+        if (marks >= 50 && !yellowLine && !yellowLineSpawned) {
           spawnYellowLine();
         }
 
-        if (score === 400 && !doubleLineActive) {
+        // Spawn double line based on marks instead of score
+        if (marks >= 100 && !doubleLineActive) {
           doubleLineActive = true;
           doubleLineTimer = 0;
           doubleLineLogged = false;
         }
 
-        if (fuel <= 0 || engine <= 0) {
-          if (engine <= 0) {
-            $scope.msg = "එන්ජින් කොලස්!";
-          } else if (fuel <= 0) {
-            $scope.msg = "තෙල් නෑ!";
-          }
+        // Game over only on fuel out
+        if (fuel <= 0) {
+          $scope.msg = "තෙල් නෑ!";
           $timeout(function () {
             gameOver();
           });
@@ -1070,6 +1242,25 @@ app.controller(
       resizeCanvas();
       initializeTrees();
       updateBars();
+
+      // Start 60 second timer
+      gameTimer = 60;
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      timerInterval = setInterval(() => {
+        if (gameRunning && !paused) {
+          gameTimer--;
+          if (gameTimer <= 0) {
+            gameTimer = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            $scope.msg = "Time's up!";
+            gameOver();
+          }
+        }
+      }, 1000);
+
       animate();
       soundManager();
       sindu.play();
@@ -1103,6 +1294,25 @@ app.controller(
         sindu.play();
         tuk_sound.play();
         $scope.page = 3;
+
+        // Start 60 second timer
+        gameTimer = 60;
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+        timerInterval = setInterval(() => {
+          if (gameRunning && !paused) {
+            gameTimer--;
+            if (gameTimer <= 0) {
+              gameTimer = 0;
+              clearInterval(timerInterval);
+              timerInterval = null;
+              $scope.msg = "Time's up!";
+              gameOver();
+            }
+          }
+        }, 1000);
+
         animate();
       }, 6000);
     };
