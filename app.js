@@ -58,8 +58,8 @@ app.controller(
       lane: "left",
       y: 0,
       x: 0,
-      width: 160,
-      height: 280,
+      width: 260,
+      height: 400,
     };
 
     const treeImages = [];
