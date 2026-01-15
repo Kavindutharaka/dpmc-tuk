@@ -387,7 +387,7 @@ app.controller(
     function drawMiddleLine() {
       const centerX = canvas.width / 2;
       const height = lineHeight;
-      let segmentY = 600 + offset; // Start first segment below road top (500 + 100)
+      let segmentY = 500 + offset; // Start right at road top (Y=500)
 
       let topWidth = 8;
       let bottomWidth = topWidth + 3;
