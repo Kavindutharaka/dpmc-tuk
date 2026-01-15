@@ -53,20 +53,20 @@ app.controller(
 
     // Genuine spare parts (correct items - add marks)
     const genuinePartsPaths = [
-      "./genuine/part1.png",
-      "./genuine/part2.png",
-      "./genuine/part3.png",
-      "./genuine/part4.png",
-      "./genuine/part5.png"
+      "./genuine/part1.jpeg",
+      "./genuine/part2.jpeg",
+      "./genuine/part3.jpeg",
+      "./genuine/part4.jpeg",
+      "./genuine/part5.jpeg"
     ];
 
     // Non-genuine spare parts (incorrect items - decrease marks)
     const nonGenuinePartsPaths = [
-      "./nongenuine/part1.png",
-      "./nongenuine/part2.png",
-      "./nongenuine/part3.png",
-      "./nongenuine/part4.png",
-      "./nongenuine/part5.png"
+      "./nongenuine/part1.jpeg",
+      "./nongenuine/part2.jpeg",
+      // "./nongenuine/part3.png",
+      // "./nongenuine/part4.png",
+      // "./nongenuine/part5.png"
     ];
 
     // Load genuine parts images
