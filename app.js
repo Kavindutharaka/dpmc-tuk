@@ -135,7 +135,7 @@ app.controller(
     function updateTrees() {
       if (!gameRunning || paused) return;
 
-      const roadTopY = 250;
+      const roadTopY = 500;
       const roadBottomY = canvas.height;
       const roadTopWidth = canvas.width * 0.4;
       const roadBottomWidth = canvas.width;
@@ -194,10 +194,29 @@ app.controller(
           const treeImg = treeImages[tree.type];
           if (treeImg && treeImg.complete) {
             const size = tree.currentSize || tree.size;
-
             const alpha = Math.min(1, (tree.y - 200) / 100);
-            ctx.globalAlpha = alpha * 0.8;
 
+            // Draw 3D shadow for trees
+            ctx.globalAlpha = alpha * 0.4;
+            ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+            ctx.shadowBlur = 15 + (size / 10);
+            ctx.shadowOffsetX = 8;
+            ctx.shadowOffsetY = 8;
+
+            // Draw tree shadow
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+            ctx.beginPath();
+            ctx.ellipse(
+              tree.x,
+              tree.y + size / 3,
+              size / 3,
+              size / 8,
+              0, 0, Math.PI * 2
+            );
+            ctx.fill();
+
+            // Draw tree with depth
+            ctx.globalAlpha = alpha * 0.9;
             ctx.drawImage(
               treeImg,
               tree.x - size / 2,
@@ -206,7 +225,12 @@ app.controller(
               size
             );
 
+            // Reset
             ctx.globalAlpha = 1;
+            ctx.shadowColor = "transparent";
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
           }
         }
       });
@@ -225,7 +249,7 @@ app.controller(
     }
 
     function getLaneX(y, lane) {
-      const roadTopY = 250;
+      const roadTopY = 500;
       const roadBottomY = canvas.height;
       const roadTopWidth = canvas.width * 0.4;
       const roadBottomWidth = canvas.width;
@@ -245,7 +269,7 @@ app.controller(
       if (!gameRunning || paused) return;
 
       const lane = Math.random() < 0.5 ? "left" : "right";
-      const startY = 250;
+      const startY = 500;
 
       const minDistance = 100;
       const hasOverlap = items.some(
@@ -283,23 +307,46 @@ app.controller(
     }, spawnInterval);
 
     function drawBackground() {
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, 180);
-      skyGradient.addColorStop(0, "#87CEEB");
+      // Enhanced 3D sky gradient
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, 500);
+      skyGradient.addColorStop(0, "#4a90e2");
+      skyGradient.addColorStop(0.5, "#87CEEB");
       skyGradient.addColorStop(1, "#B0E0E6");
       ctx.fillStyle = skyGradient;
-      ctx.fillRect(0, 0, canvas.width, 250);
+      ctx.fillRect(0, 0, canvas.width, 500);
 
-      ctx.fillStyle = "#228B22";
-      ctx.fillRect(0, 250, canvas.width, canvas.height - 250);
+      // Enhanced 3D ground gradient with depth
+      const groundGradient = ctx.createLinearGradient(0, 500, 0, canvas.height);
+      groundGradient.addColorStop(0, "#2a5a2a");
+      groundGradient.addColorStop(0.3, "#228B22");
+      groundGradient.addColorStop(1, "#1a4d1a");
+      ctx.fillStyle = groundGradient;
+      ctx.fillRect(0, 500, canvas.width, canvas.height - 500);
+
+      // Add atmospheric perspective overlay
+      const atmosphereGradient = ctx.createRadialGradient(
+        canvas.width / 2, 500, 100,
+        canvas.width / 2, 500, canvas.width
+      );
+      atmosphereGradient.addColorStop(0, "rgba(255, 255, 255, 0.1)");
+      atmosphereGradient.addColorStop(1, "rgba(135, 206, 235, 0.05)");
+      ctx.fillStyle = atmosphereGradient;
+      ctx.fillRect(0, 0, canvas.width, 500);
     }
 
     function drawRoad() {
       const roadBottom = canvas.width;
       const roadTop = canvas.width * 0.4;
       const roadStart = canvas.height;
-      const roadEnd = 250;
+      const roadEnd = 500;
 
-      ctx.fillStyle = "#2C2C2C";
+      // Road gradient for 3D depth effect
+      const roadGradient = ctx.createLinearGradient(0, roadEnd, 0, roadStart);
+      roadGradient.addColorStop(0, "#3a3a3a");
+      roadGradient.addColorStop(0.5, "#2C2C2C");
+      roadGradient.addColorStop(1, "#1a1a1a");
+      ctx.fillStyle = roadGradient;
+
       ctx.beginPath();
       ctx.moveTo(canvas.width / 2 - roadBottom / 2, roadStart);
       ctx.lineTo(canvas.width / 2 + roadBottom / 2, roadStart);
@@ -308,23 +355,37 @@ app.controller(
       ctx.closePath();
       ctx.fill();
 
+      // Add 3D shadow to road edges
+      ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetX = -15;
+      ctx.shadowOffsetY = 0;
+
+      // Left road edge with glow
       ctx.strokeStyle = "#FFFFFF";
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 12;
       ctx.beginPath();
       ctx.moveTo(canvas.width / 2 - roadBottom / 2 + 15, roadStart);
       ctx.lineTo(canvas.width / 2 - roadTop / 2 + 15, roadEnd);
       ctx.stroke();
 
+      ctx.shadowOffsetX = 15;
+
+      // Right road edge with glow
       ctx.beginPath();
       ctx.moveTo(canvas.width / 2 + roadBottom / 2 - 15, roadStart);
       ctx.lineTo(canvas.width / 2 + roadTop / 2 - 15, roadEnd);
       ctx.stroke();
+
+      // Reset shadow
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     }
 
     function drawMiddleLine() {
-      ctx.fillStyle = "#FFFFFF";
       const centerX = canvas.width / 2;
-
       const height = lineHeight;
       let segmentY = 370 - height + offset;
 
@@ -332,6 +393,22 @@ app.controller(
       let bottomWidth = topWidth + 3;
 
       while (segmentY < canvas.height) {
+        // Add 3D shadow to line segments
+        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
+
+        // Create gradient for 3D effect
+        const lineGradient = ctx.createLinearGradient(
+          centerX - bottomWidth / 2, segmentY,
+          centerX + bottomWidth / 2, segmentY
+        );
+        lineGradient.addColorStop(0, "#d0d0d0");
+        lineGradient.addColorStop(0.5, "#FFFFFF");
+        lineGradient.addColorStop(1, "#d0d0d0");
+        ctx.fillStyle = lineGradient;
+
         ctx.beginPath();
         ctx.moveTo(centerX - topWidth / 2, segmentY);
         ctx.lineTo(centerX + topWidth / 2, segmentY);
@@ -341,10 +418,15 @@ app.controller(
         ctx.fill();
 
         segmentY += lineSpacing;
-
         topWidth = bottomWidth + 2;
         bottomWidth = topWidth + 2;
       }
+
+      // Reset shadow
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     }
 
     function drawDMiddleLine() {
@@ -368,7 +450,7 @@ app.controller(
 
     function spawnYellowLine() {
       yellowLine = {
-        y: 250,
+        y: 500,
         height: 20,
         width: 100,
         speed: 0.6,
@@ -393,7 +475,7 @@ app.controller(
       yellowLine.imageWidth += yellowLine.sizeIncreaseRate * game_speed;
       yellowLine.imageHeight += yellowLine.sizeIncreaseRate * 0.5 * game_speed;
 
-      const roadTopY = 250;
+      const roadTopY = 500;
       const roadBottomY = canvas.height;
       const roadTopWidth = canvas.width * 0.4;
       const roadBottomWidth = canvas.width;
@@ -406,11 +488,26 @@ app.controller(
       const totalStripeWidth = roadWidthAtY - 40;
       const stripeWidth = totalStripeWidth / (yellowLine.stripeCount * 2 - 1);
 
+      // Add 3D shadow to yellow lines
+      ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 4;
+      ctx.shadowOffsetY = 4;
+
       for (let i = 0; i < yellowLine.stripeCount; i++) {
         const stripeXStart = leftRoadEdge + 20 + i * (stripeWidth + yellowLine.stripeGap);
         const stripeXEnd = stripeXStart + stripeWidth;
 
-        ctx.fillStyle = "#dafe0eff";
+        // Gradient for 3D effect
+        const yellowGradient = ctx.createLinearGradient(
+          stripeXStart, yellowLine.y,
+          stripeXEnd, yellowLine.y + yellowLine.height
+        );
+        yellowGradient.addColorStop(0, "#ffff88");
+        yellowGradient.addColorStop(0.5, "#dafe0eff");
+        yellowGradient.addColorStop(1, "#c0d800");
+        ctx.fillStyle = yellowGradient;
+
         ctx.beginPath();
         ctx.moveTo(stripeXStart, yellowLine.y);
         ctx.lineTo(stripeXEnd, yellowLine.y);
@@ -419,6 +516,12 @@ app.controller(
         ctx.closePath();
         ctx.fill();
       }
+
+      // Reset shadow
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
 
       if (walkImg.complete) {
         const imageX = centerX - yellowLine.imageWidth / 2;
@@ -490,15 +593,36 @@ app.controller(
     }
 
     function drawScore() {
-      ctx.fillStyle = "#FFFFFF";
-      ctx.font = "bold 36px Arial";
       ctx.textAlign = "center";
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 3;
-
       const scoreText = score.toString().padStart(4, "0");
-      ctx.strokeText(scoreText, canvas.width / 2, 50);
-      ctx.fillText(scoreText, canvas.width / 2, 50);
+
+      // 3D depth layers for score
+      ctx.font = "bold 80px Arial";
+
+      // Bottom shadow layer
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillText(scoreText, canvas.width / 2 + 6, 136);
+
+      // Dark outline
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 8;
+      ctx.strokeText(scoreText, canvas.width / 2, 130);
+
+      // Gradient fill for 3D effect
+      const scoreGradient = ctx.createLinearGradient(
+        canvas.width / 2 - 100, 100,
+        canvas.width / 2 + 100, 130
+      );
+      scoreGradient.addColorStop(0, "#FFD700");
+      scoreGradient.addColorStop(0.5, "#FFFFFF");
+      scoreGradient.addColorStop(1, "#FFD700");
+      ctx.fillStyle = scoreGradient;
+      ctx.fillText(scoreText, canvas.width / 2, 130);
+
+      // Top highlight
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.lineWidth = 2;
+      ctx.strokeText(scoreText, canvas.width / 2 - 1, 128);
     }
 
     function checkCollision(item, tuk) {
@@ -520,16 +644,35 @@ app.controller(
         const img = itemImages[item.type];
 
         if (img.complete) {
-          const size = 50;
+          const size = 80;  // Increased size for better visibility on 1080x1920
+
+          // Draw 3D shadow for items
+          ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+          ctx.shadowBlur = 20;
+          ctx.shadowOffsetX = 6;
+          ctx.shadowOffsetY = 6;
+
+          // Add glow effect for collectibles
+          if (item.type !== "barrier") {
+            ctx.shadowColor = "rgba(255, 200, 50, 0.6)";
+            ctx.shadowBlur = 25;
+          }
+
           ctx.drawImage(img, item.x - size / 2, item.y - size / 2, size, size);
+
+          // Reset shadow
+          ctx.shadowColor = "transparent";
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
         }
 
         if (gameRunning && !paused) {
           const itemRect = {
-            x: item.x - 25,
-            y: item.y - 25,
-            width: 50,
-            height: 50,
+            x: item.x - 40,
+            y: item.y - 40,
+            width: 80,
+            height: 80,
           };
 
           const tukRect = {
@@ -575,6 +718,27 @@ app.controller(
     function drawTuk() {
       tuk.x = getLaneX(tuk.y, tuk.lane);
       if (tukImg.complete) {
+        // Draw 3D shadow for the tuk
+        ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetX = 10;
+        ctx.shadowOffsetY = 15;
+
+        // Draw ground shadow
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        ctx.beginPath();
+        ctx.ellipse(
+          tuk.x,
+          tuk.y + tuk.height / 2 + 10,
+          tuk.width / 2.5,
+          tuk.height / 8,
+          0, 0, Math.PI * 2
+        );
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Draw tuk with 3D depth
         ctx.drawImage(
           tukImg,
           tuk.x - tuk.width / 2,
@@ -582,6 +746,12 @@ app.controller(
           tuk.width,
           tuk.height
         );
+
+        // Reset shadow
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
       }
     }
 
@@ -764,13 +934,34 @@ app.controller(
         drawTuk();
         drawScore();
 
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font = "bold 48px Arial";
+        // 3D Paused text
         ctx.textAlign = "center";
+        ctx.font = "bold 120px Arial";
+
+        // Shadow layer
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.fillText("PAUSED", canvas.width / 2 + 8, canvas.height / 2 + 8);
+
+        // Outline
         ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 4;
-        ctx.strokeText("Paused", canvas.width / 2, canvas.height / 2);
-        ctx.fillText("Paused", canvas.width / 2, canvas.height / 2);
+        ctx.lineWidth = 10;
+        ctx.strokeText("PAUSED", canvas.width / 2, canvas.height / 2);
+
+        // Gradient fill
+        const pauseGradient = ctx.createLinearGradient(
+          0, canvas.height / 2 - 60,
+          0, canvas.height / 2 + 60
+        );
+        pauseGradient.addColorStop(0, "#FFD700");
+        pauseGradient.addColorStop(0.5, "#FFFFFF");
+        pauseGradient.addColorStop(1, "#FFD700");
+        ctx.fillStyle = pauseGradient;
+        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+
+        // Highlight
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.lineWidth = 3;
+        ctx.strokeText("PAUSED", canvas.width / 2 - 2, canvas.height / 2 - 2);
         return;
       }
 
@@ -912,12 +1103,11 @@ app.controller(
 
     function resizeCanvas() {
       const canvas = document.getElementById("gameCanvas");
-      const wrapper = document.querySelector(".game-wrapper");
 
-      if (canvas && wrapper) {
-        const wrapperRect = wrapper.getBoundingClientRect();
-        canvas.width = wrapperRect.width;
-        canvas.height = wrapperRect.height;
+      if (canvas) {
+        // Fixed dimensions for 1080x1920 kiosk
+        canvas.width = 1080;
+        canvas.height = 1920;
       }
     }
 
@@ -940,11 +1130,8 @@ app.controller(
       });
     }
 
+    // Fixed canvas dimensions for kiosk - no need for resize listeners
     window.addEventListener("load", resizeCanvas);
-    window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("orientationchange", function () {
-      setTimeout(resizeCanvas, 100);
-    });
 
     document.addEventListener("DOMContentLoaded", function () {
       const soundIcon = document.querySelector(".sound-icon");

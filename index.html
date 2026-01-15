@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Bajaj</title>
+  <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0, user-scalable=no" />
+  <title>Bajaj 3D Kiosk</title>
   <script type="text/javascript" src="sup/swiped-events.js"></script>
 
   <script src="./sup/angular.min.js"></script>
@@ -20,103 +20,126 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      width: 1080px;
+      height: 1920px;
       font-family: Arial, sans-serif;
-      background: #000;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
       overflow: hidden;
-      height: 100vh;
+      perspective: 2000px;
     }
 
     .game-wrapper {
-      width: 100vw;
-      height: 100vh;
-      max-width: 720px;
-      max-height: 1080px;
+      width: 1080px;
+      height: 1920px;
       position: relative;
-      background: #000;
+      background: linear-gradient(180deg, #000 0%, #1a1a2e 100%);
       margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
+                  inset 0 0 100px rgba(0, 100, 255, 0.1);
+      transform-style: preserve-3d;
     }
 
     #user_form {
       position: relative;
-      background: rgba(0, 0, 0, 0.9);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
       color: white;
-      padding: 12vh 3vw;
+      padding: 230px 60px;
       width: 100%;
       height: 100%;
       border-radius: 0;
       text-align: center;
       display: flex;
       flex-direction: column;
-      /* justify-content: center; */
       align-items: center;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      box-shadow: inset 0 0 100px rgba(0, 100, 255, 0.2);
       overflow: hidden;
+      transform-style: preserve-3d;
     }
 
     #logo {
-      width: 15vw;
-      height: 15vw;
-      max-width: 100px;
-      max-height: 100px;
-      min-width: 60px;
-      min-height: 60px;
-      margin-bottom: 4vh;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 80px;
+      filter: drop-shadow(0 10px 30px rgba(52, 152, 219, 0.5));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateZ(20px) translateY(0px); }
+      50% { transform: translateZ(40px) translateY(-20px); }
     }
 
     .user-form-details {
       display: flex;
       flex-direction: column;
-      gap: 1vh;
+      gap: 40px;
       align-items: center;
       width: 100%;
+      transform: translateZ(30px);
     }
 
     .form-label {
-      margin-bottom: 1vh;
-      font-size: 4vw;
-      max-font-size: 18px;
-      min-font-size: 14px;
+      margin-bottom: 20px;
+      font-size: 42px;
+      font-weight: bold;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5),
+                   0 0 20px rgba(52, 152, 219, 0.3);
     }
 
     .form-input {
-      padding: 3vw;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      background-color: #333;
+      padding: 30px;
+      border: 3px solid #3498db;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(51, 51, 51, 0.9) 0%, rgba(26, 26, 46, 0.9) 100%);
       color: white;
-      width: 80vw;
-      max-width: 300px;
-      margin-bottom: 2vh;
-      font-size: 4vw;
-      max-font-size: 16px;
-      min-font-size: 14px;
+      width: 700px;
+      margin-bottom: 40px;
+      font-size: 38px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                  inset 0 2px 10px rgba(52, 152, 219, 0.2);
+      transform: translateZ(20px);
+      transition: all 0.3s ease;
     }
 
     .form-input:focus {
       outline: none;
-      border-color: #3498db;
+      border-color: #52b8ff;
+      box-shadow: 0 10px 40px rgba(52, 152, 219, 0.6),
+                  inset 0 2px 10px rgba(52, 152, 219, 0.4);
+      transform: translateZ(30px) scale(1.02);
     }
 
     .user-form-button {
-      padding-top: 2vh;
+      padding-top: 60px;
+      transform: translateZ(40px);
     }
 
     button {
-      padding: 3vw 6vw;
-      background-color: #3498db;
+      padding: 35px 100px;
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
       color: white;
       border: none;
-      border-radius: 5px;
-      font-size: 4vw;
-      max-font-size: 18px;
-      min-font-size: 16px;
+      border-radius: 20px;
+      font-size: 48px;
+      font-weight: bold;
       cursor: pointer;
-      min-height: 50px;
+      min-height: 100px;
+      box-shadow: 0 15px 40px rgba(52, 152, 219, 0.5),
+                  inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
     button:hover {
-      background-color: #2980b9;
+      background: linear-gradient(135deg, #52b8ff 0%, #3498db 100%);
+      transform: translateZ(50px) translateY(-5px);
+      box-shadow: 0 20px 50px rgba(52, 152, 219, 0.7),
+                  inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateZ(40px) translateY(0px);
+      box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
     }
 
     #gameContainer {
@@ -124,45 +147,55 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      /* display: flex;
-        justify-content: center;
-        align-items: center; */
+      transform-style: preserve-3d;
     }
 
     #gameCanvas {
       display: block;
       touch-action: none;
-      width: 100%;
-      height: 100%;
+      width: 1080px;
+      height: 1920px;
       object-fit: contain;
-      background: #000;
+      background: linear-gradient(180deg, #000 0%, #0a0a1e 100%);
+      box-shadow: inset 0 0 200px rgba(0, 50, 100, 0.3);
     }
 
     .fuel-bar-container {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 40px;
+      left: 40px;
       display: flex;
       align-items: center;
       z-index: 5;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
+      transform: translateZ(50px);
     }
 
     .engine-bar-container {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 40px;
+      right: 40px;
       display: flex;
       align-items: center;
       z-index: 5;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
+      transform: translateZ(50px);
     }
 
     .bar-icon {
-      width: 30px;
-      height: 30px;
-      margin-right: 8px;
+      width: 70px;
+      height: 70px;
+      margin-right: 20px;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
+      filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.3));
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     .fuel-icon {
@@ -174,18 +207,34 @@
     }
 
     .bar {
-      width: 80px;
-      height: 20px;
-      border: 2px solid #fff;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.5);
+      width: 180px;
+      height: 45px;
+      border: 4px solid #fff;
+      border-radius: 25px;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(20, 20, 40, 0.8) 100%);
       overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5),
+                  inset 0 3px 10px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+      border-radius: 25px 25px 0 0;
     }
 
     .bar-fill {
       height: 100%;
       transition: width 0.3s ease;
-      border-radius: 8px;
+      border-radius: 20px;
+      box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+                  0 0 15px rgba(255, 255, 255, 0.3);
     }
 
     .fuel-fill {
@@ -193,6 +242,8 @@
           #ff4444 0%,
           #ffff44 50%,
           #44ff44 100%);
+      box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+                  0 0 20px rgba(68, 255, 68, 0.5);
     }
 
     .engine-fill {
@@ -200,46 +251,69 @@
           #ff4444 0%,
           #ff8844 50%,
           #44ff44 100%);
+      box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+                  0 0 20px rgba(255, 136, 68, 0.5);
     }
 
     .sound-icon {
       position: absolute;
       top: 40%;
-      left: 20px;
-      width: 45px;
-      height: 45px;
+      left: 40px;
+      width: 100px;
+      height: 100px;
       background-image: url("./icon/volume.png");
-      background-size: contain;
+      background-size: 60%;
       background-repeat: no-repeat;
       background-position: center;
       z-index: 10;
       cursor: pointer;
-      background-color: white;
-      border: 2px solid white;
+      background-color: rgba(255, 255, 255, 0.95);
+      border: 5px solid white;
       border-radius: 50%;
-      z-index: 10;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6),
+                  inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+      transform: translateZ(40px);
+      transition: all 0.3s ease;
+    }
+
+    .sound-icon:hover {
+      transform: translateZ(50px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .sound-icon:active {
+      transform: translateZ(35px) scale(0.98);
     }
 
     .break-icon {
       position: absolute;
       top: 50%;
-      right: 8px;
-      width: 65px;
-      height: 65px;
+      right: 40px;
+      width: 120px;
+      height: 120px;
       background-image: url("./icon/brake.png");
-      background-size: contain;
+      background-size: 65%;
       background-repeat: no-repeat;
       background-position: center;
       z-index: 10;
       cursor: pointer;
-      background-color: white;
-      border: 2px solid white;
+      background-color: rgba(255, 255, 255, 0.95);
+      border: 5px solid white;
       border-radius: 50%;
-      z-index: 10;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6),
+                  inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+      transform: translateZ(40px);
+      transition: all 0.3s ease;
     }
 
     .break-icon:hover {
-      background-color: rgb(195, 192, 192);
+      background-color: rgba(220, 220, 220, 0.95);
+      transform: translateZ(50px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .break-icon:active {
+      transform: translateZ(35px) scale(0.98);
     }
 
     .sound-icon.muted {
@@ -250,192 +324,139 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.9);
+      transform: translate(-50%, -50%) translateZ(100px);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
       color: white;
-      padding: 30px;
-      border-radius: 15px;
+      padding: 80px;
+      border-radius: 30px;
       text-align: center;
       display: none;
-      z-index: 10;
-      width: 80vw;
-      max-width: 400px;
+      z-index: 100;
+      width: 800px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8),
+                  inset 0 0 50px rgba(255, 68, 68, 0.2);
+      border: 3px solid rgba(255, 68, 68, 0.5);
     }
 
     #gameOverModal h2 {
-      margin: 0 0 4vw 0;
+      margin: 0 0 50px 0;
       color: #ff4444;
-      font-size: 8vw;
-      max-font-size: 32px;
-      min-font-size: 24px;
+      font-size: 90px;
+      font-weight: bold;
+      text-shadow: 0 8px 20px rgba(255, 68, 68, 0.8),
+                   0 0 40px rgba(255, 68, 68, 0.5);
+      animation: gameOverPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes gameOverPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     #gameOverModal p {
-      margin: 2vw 0;
-      font-size: 4vw;
-      max-font-size: 18px;
-      min-font-size: 14px;
+      margin: 30px 0;
+      font-size: 48px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
     }
 
     #tryAgainBtn {
-      background: #4caf50;
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
       color: white;
       border: none;
-      padding: 4vw 8vw;
-      font-size: 4vw;
-      max-font-size: 18px;
-      min-font-size: 16px;
-      border-radius: 8px;
+      padding: 35px 90px;
+      font-size: 48px;
+      font-weight: bold;
+      border-radius: 20px;
       cursor: pointer;
-      margin-top: 4vw;
-      min-height: 50px;
+      margin-top: 40px;
+      min-height: 100px;
+      box-shadow: 0 15px 40px rgba(76, 175, 80, 0.5),
+                  inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
     #tryAgainBtn:hover {
-      background: #45a049;
+      background: linear-gradient(135deg, #5ed662 0%, #4caf50 100%);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(76, 175, 80, 0.7);
+    }
+
+    #tryAgainBtn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.5);
     }
 
     #gameOverModal2 {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) translateZ(100px);
       color: white;
-      padding: 6vw;
-      border-radius: 15px;
+      padding: 100px;
+      border-radius: 30px;
       text-align: center;
       z-index: 999999999999999999;
-    }
-
-    @media screen and (max-width: 480px) {
-      .form-label {
-        font-size: 16px;
-      }
-
-      .form-input {
-        font-size: 16px;
-        padding: 12px;
-      }
-
-      .button {
-        font-size: 16px;
-        padding: 12px 24px;
-      }
-
-      .bar {
-        width: 60px;
-        height: 16px;
-      }
-
-      .bar-icon {
-        width: 24px;
-        height: 24px;
-      }
-    }
-
-    @media screen and (min-width: 768px) {
-      .form-label {
-        font-size: 18px;
-      }
-
-      .form-input {
-        font-size: 16px;
-        width: 60vw;
-        max-width: 350px;
-      }
-
-      button {
-        font-size: 18px;
-      }
-    }
-
-    @media screen and (min-width: 1024px) {
-      body {
-        background: #222;
-      }
-
-      .game-wrapper {
-        border-radius: 10px;
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-      }
-
-      .form-label {
-        font-size: 18px;
-      }
-
-      .form-input {
-        font-size: 16px;
-        width: 300px;
-        padding: 12px;
-      }
-
-      button {
-        font-size: 18px;
-        padding: 15px 30px;
-      }
-
-      #logo {
-        width: 80px;
-        height: 80px;
-      }
-
-      .bar {
-        width: 100px;
-        height: 24px;
-      }
-
-      .bar-icon {
-        width: 36px;
-        height: 36px;
-      }
     }
 
     .gameOverModal {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.9);
+      transform: translate(-50%, -50%) translateZ(100px);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
       color: white;
-      padding: 30px;
-      border-radius: 15px;
+      padding: 80px;
+      border-radius: 30px;
       text-align: center;
-      z-index: 10;
-      width: 80vw;
-      max-width: 400px;
+      z-index: 100;
+      width: 800px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8),
+                  inset 0 0 50px rgba(255, 200, 68, 0.2);
+      border: 3px solid rgba(255, 200, 68, 0.5);
     }
 
     .gameOverModal h2 {
-      margin: 0 0 4vw 0;
-      color: #ff4444;
-      font-size: 8vw;
-      max-font-size: 32px;
-      min-font-size: 24px;
+      margin: 0 0 50px 0;
+      color: #ffc844;
+      font-size: 80px;
+      font-weight: bold;
+      text-shadow: 0 8px 20px rgba(255, 200, 68, 0.8),
+                   0 0 40px rgba(255, 200, 68, 0.5);
     }
 
     .gameOverModal p {
-      margin: 2vw 0;
-      font-size: 4vw;
-      max-font-size: 18px;
-      min-font-size: 14px;
+      margin: 30px 0;
+      font-size: 48px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
     }
 
     .tryAgainBtn {
-      background: #4caf50;
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
       color: white;
       border: none;
-      padding: 4vw 8vw;
-      font-size: 4vw;
-      max-font-size: 18px;
-      min-font-size: 16px;
-      border-radius: 8px;
+      padding: 35px 90px;
+      font-size: 48px;
+      font-weight: bold;
+      border-radius: 20px;
       cursor: pointer;
-      margin-top: 4vw;
-      min-height: 50px;
+      margin-top: 40px;
+      min-height: 100px;
+      box-shadow: 0 15px 40px rgba(76, 175, 80, 0.5),
+                  inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
     .tryAgainBtn:hover {
-      background: #45a049;
+      background: linear-gradient(135deg, #5ed662 0%, #4caf50 100%);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(76, 175, 80, 0.7);
+    }
+
+    .tryAgainBtn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.5);
     }
   </style>
 </head>
