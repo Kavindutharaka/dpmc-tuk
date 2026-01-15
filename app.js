@@ -34,6 +34,11 @@ app.controller(
     let showGoldenAnimation = false;
     let goldenAnimationTimer = 0;
 
+    // Notification queue system to prevent overlapping modals
+    let notificationQueue = [];
+    let isShowingNotification = false;
+    let currentNotificationType = null;
+
     const lineSpacing = 140;
     const lineHeight = 120;
     let offset = 0;
@@ -605,21 +610,13 @@ app.controller(
         ) {
           console.log("You near the crossing lines");
           yellowLine.loggedNearCrossing = true;
-          if (!paused) {
-            $scope.pauseGame();
+          if (!isShowingNotification) {
             yellowLinePaused = true;
+            showNotification('warning', 'You need to stop Vehicle!', null, 2000);
             $timeout(function () {
-              $scope.crossLnHit = true;
-              $scope.warn_msg = "You need to stop Vehicle";
-              console.log("You need to stop Vehicle");
-              $timeout(function () {
-                $scope.resumeGame();
-                $scope.crossLnHit = false;
-                $scope.warn_msg = "";
-                yellowLinePaused = false;
-                inSafeRange = false;
-              }, 2000);
-            });
+              yellowLinePaused = false;
+              inSafeRange = false;
+            }, 2000);
           }
         }
       }
@@ -823,21 +820,8 @@ app.controller(
               marks = Math.max(0, marks - 5);
               item.collected = true;
 
-              // Show alert modal
-              $timeout(function() {
-                $scope.wrongPartImage = nonGenuinePartsPaths[item.partIndex];
-                $scope.showWrongPartAlert = true;
-                paused = true;
-                $scope.pause = true;
-                sindu.pause();
-                tuk_sound.pause();
-
-                // Auto close after 2 seconds
-                $timeout(function() {
-                  $scope.showWrongPartAlert = false;
-                  $scope.resumeGame();
-                }, 2000);
-              });
+              // Show alert using notification queue
+              showNotification('wrongpart', '', nonGenuinePartsPaths[item.partIndex], 2000);
               console.log("Non-genuine part collected! -5 marks");
             } else if (item.type === "barrier") {
               $scope.msg = "බාධකයක හැපුණා!"; // Barrier collision message
@@ -858,6 +842,76 @@ app.controller(
     $scope.tel = function () {
       console.log("Fuel collected");
     };
+
+    // Notification queue management system
+    function showNotification(type, message, imagePath = null, duration = 2000) {
+      // If a notification is currently showing, queue this one
+      if (isShowingNotification) {
+        notificationQueue.push({ type, message, imagePath, duration });
+        return;
+      }
+
+      isShowingNotification = true;
+      currentNotificationType = type;
+      paused = true;
+      $scope.pause = true;
+      sindu.pause();
+      tuk_sound.pause();
+
+      $timeout(function() {
+        if (type === 'warning') {
+          $scope.warn_msg = message;
+          $scope.crossLnHit = true;
+          $scope.showAppreciation = false;
+          $scope.showWrongPartAlert = false;
+        } else if (type === 'appreciation') {
+          $scope.appreciation_msg = message;
+          $scope.showAppreciation = true;
+          $scope.crossLnHit = false;
+          $scope.showWrongPartAlert = false;
+        } else if (type === 'wrongpart') {
+          $scope.wrongPartImage = imagePath;
+          $scope.showWrongPartAlert = true;
+          $scope.crossLnHit = false;
+          $scope.showAppreciation = false;
+        }
+
+        // Auto close after duration
+        $timeout(function() {
+          closeCurrentNotification();
+          processNextNotification();
+        }, duration);
+      });
+    }
+
+    function closeCurrentNotification() {
+      $scope.crossLnHit = false;
+      $scope.showAppreciation = false;
+      $scope.showWrongPartAlert = false;
+      $scope.warn_msg = "";
+      $scope.appreciation_msg = "";
+      isShowingNotification = false;
+      currentNotificationType = null;
+
+      // Only resume if game is still running
+      if (gameRunning && !yellowLinePaused) {
+        $scope.resumeGame();
+      }
+    }
+
+    function processNextNotification() {
+      if (notificationQueue.length > 0) {
+        const next = notificationQueue.shift();
+        showNotification(next.type, next.message, next.imagePath, next.duration);
+      }
+    }
+
+    function clearNotificationQueue() {
+      notificationQueue = [];
+      if (isShowingNotification) {
+        closeCurrentNotification();
+      }
+    }
 
     function drawTuk() {
       tuk.x = getLaneX(tuk.y, tuk.lane);
@@ -942,7 +996,12 @@ app.controller(
       showGoldenAnimation = false;
       goldenAnimationTimer = 0;
       $scope.msg = ""; // Clear game over message
+
+      // Clear notification system
+      clearNotificationQueue();
       $scope.showWrongPartAlert = false;
+      $scope.showAppreciation = false;
+      $scope.crossLnHit = false;
 
       // Reset timer to 60 seconds
       gameTimer = 60;
@@ -981,20 +1040,13 @@ app.controller(
         sindu.pause();
         tuk_sound.pause();
         console.log("Game paused");
-        if (inSafeRange && yellowLine) {
+        if (inSafeRange && yellowLine && !isShowingNotification) {
           yellowLine = null;
+          showNotification('appreciation', 'Good job stopping! 🎉', null, 2000);
           $timeout(function () {
-            $scope.crossLnHit = true;
-            $scope.warn_msg = "Good job stopping!";
-            console.log("Good job stopping!");
-            $timeout(function () {
-              $scope.resumeGame();
-              $scope.crossLnHit = false;
-              $scope.warn_msg = "";
-              yellowLinePaused = false;
-              inSafeRange = false;
-            }, 2000);
-          });
+            yellowLinePaused = false;
+            inSafeRange = false;
+          }, 2000);
         }
       }
     };
@@ -1013,31 +1065,17 @@ app.controller(
     canvas.addEventListener("swiped-left", () => {
       if (gameRunning && !paused && tuk.lane === "right") {
         tuk.lane = "left";
-        if (doubleLineActive && !doubleLineLogged) {
+        if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
           doubleLineLogged = true;
-          $timeout(function () {
-            $scope.crossLnHit = true;
-            $scope.warn_msg = "You cross Double line!!!";
-            console.log("You cross Double line!!!");
-            $timeout(function () {
-              $scope.crossLnHit = false;
-              $scope.warn_msg = "";
-            }, 2000);
-          });
+          showNotification('warning', 'You crossed the Double line!!!', null, 2000);
+          console.log("You cross Double line!!!");
         }
-        if (yellowLinePaused) {
+        if (yellowLinePaused && !isShowingNotification) {
+          showNotification('warning', 'You need to stop Vehicle!', null, 2000);
           $timeout(function () {
-            $scope.crossLnHit = true;
-            $scope.warn_msg = "You need to stop Vehicle";
-            console.log("You need to stop Vehicle");
-            $timeout(function () {
-              $scope.resumeGame();
-              $scope.crossLnHit = false;
-              $scope.warn_msg = "";
-              yellowLinePaused = false;
-              inSafeRange = false;
-            }, 2000);
-          });
+            yellowLinePaused = false;
+            inSafeRange = false;
+          }, 2000);
         }
       }
     });
@@ -1045,31 +1083,17 @@ app.controller(
     canvas.addEventListener("swiped-right", () => {
       if (gameRunning && !paused && tuk.lane === "left") {
         tuk.lane = "right";
-        if (doubleLineActive && !doubleLineLogged) {
+        if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
           doubleLineLogged = true;
-          $timeout(function () {
-            $scope.crossLnHit = true;
-            $scope.warn_msg = "You cross Double line!!!";
-            console.log("You cross Double line!!!");
-            $timeout(function () {
-              $scope.crossLnHit = false;
-              $scope.warn_msg = "";
-            }, 2000);
-          });
+          showNotification('warning', 'You crossed the Double line!!!', null, 2000);
+          console.log("You cross Double line!!!");
         }
-        if (yellowLinePaused) {
+        if (yellowLinePaused && !isShowingNotification) {
+          showNotification('warning', 'You need to stop Vehicle!', null, 2000);
           $timeout(function () {
-            $scope.crossLnHit = true;
-            $scope.warn_msg = "You need to stop Vehicle";
-            console.log("You need to stop Vehicle");
-            $timeout(function () {
-              $scope.resumeGame();
-              $scope.crossLnHit = false;
-              $scope.warn_msg = "";
-              yellowLinePaused = false;
-              inSafeRange = false;
-            }, 2000);
-          });
+            yellowLinePaused = false;
+            inSafeRange = false;
+          }, 2000);
         }
       }
     });
@@ -1162,21 +1186,9 @@ app.controller(
           doubleLineTimer = 0;
           doubleLineLogged = false;
           barrierCooldown = 2000;
-          if (!wasDoubleLineLogged) {
-            paused = true;
-            $scope.pause = true;
-            sindu.pause();
-            tuk_sound.pause();
-            $timeout(function () {
-              $scope.crossLnHit = true;
-              $scope.warn_msg = "Good job!";
-              console.log("Good job!");
-              $timeout(function () {
-                $scope.resumeGame();
-                $scope.crossLnHit = false;
-                $scope.warn_msg = "";
-              }, 2000);
-            });
+          if (!wasDoubleLineLogged && !isShowingNotification) {
+            showNotification('appreciation', 'Excellent! You stayed in your lane! 🎉', null, 2000);
+            console.log("Good job!");
           }
         }
       } else {
