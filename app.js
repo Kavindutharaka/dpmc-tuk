@@ -969,6 +969,12 @@ app.controller(
 
       tuk.y = canvas.height - 140;
 
+      // Animate middle line offset for scrolling effect
+      offset += game_speed;
+      if (offset >= lineSpacing) {
+        offset = 0;
+      }
+
       drawBackground();
       updateTrees();
       drawTrees();
