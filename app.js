@@ -58,8 +58,8 @@ app.controller(
       lane: "left",
       y: 0,
       x: 0,
-      width: 130,
-      height: 240,
+      width: 160,
+      height: 280,
     };
 
     const treeImages = [];
@@ -90,7 +90,7 @@ app.controller(
           initialY: 450 + Math.random() * 100,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
-          size: 40 + Math.random() * 20,
+          size: 60 + Math.random() * 30,
           side: "left",
         });
         trees[trees.length - 1].initialX = trees[trees.length - 1].x;
@@ -104,7 +104,7 @@ app.controller(
           initialY: 450 + Math.random() * 100,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
-          size: 40 + Math.random() * 20,
+          size: 60 + Math.random() * 30,
           side: "right",
         });
         trees[trees.length - 1].initialX = trees[trees.length - 1].x;
@@ -117,7 +117,7 @@ app.controller(
         y: 400 + Math.random() * 50, // Spawn near horizon
         initialY: 400 + Math.random() * 50,
         speed: 0.3 + Math.random() * 0.4,
-        size: 40 + Math.random() * 20,
+        size: 60 + Math.random() * 30,
         side: side,
       };
 
@@ -644,7 +644,7 @@ app.controller(
         const img = itemImages[item.type];
 
         if (img.complete) {
-          const size = 80;  // Increased size for better visibility on 1080x1920
+          const size = 110;  // Increased size for better visibility on kiosk
 
           // Draw 3D shadow for items
           ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
@@ -669,10 +669,10 @@ app.controller(
 
         if (gameRunning && !paused) {
           const itemRect = {
-            x: item.x - 40,
-            y: item.y - 40,
-            width: 80,
-            height: 80,
+            x: item.x - 55,
+            y: item.y - 55,
+            width: 110,
+            height: 110,
           };
 
           const tukRect = {
@@ -967,7 +967,7 @@ app.controller(
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      tuk.y = canvas.height - 140;
+      tuk.y = canvas.height - 180; // Adjusted for larger tuk size
 
       // Animate middle line offset for scrolling effect
       offset += game_speed;
