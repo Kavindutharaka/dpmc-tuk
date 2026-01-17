@@ -115,6 +115,174 @@ app.controller(
     const trees = [];
     const treeSpawnRate = 0.05;
 
+    // Load house images
+    const houseImages = [];
+    for (let i = 1; i <= 4; i++) {
+      const houseImg = new Image();
+      houseImg.src = `images/houses/h${i}.png`;
+      houseImages.push(houseImg);
+    }
+
+    const houses = [];
+    const houseSpawnRate = 0.02; // Spawn less frequently than trees
+
+    function initializeHouses() {
+      // Initialize 2 houses on left side
+      for (let i = 0; i < 2; i++) {
+        houses.push({
+          type: Math.floor(Math.random() * 4), // 4 house images (h1-h4)
+          x: Math.random() * (canvas.width * 0.25),
+          y: 450 + Math.random() * 100,
+          initialY: 450 + Math.random() * 100,
+          initialX: 0,
+          speed: 0.3 + Math.random() * 0.4,
+          size: 100 + Math.random() * 50, // Larger than trees
+          side: "left",
+        });
+        houses[houses.length - 1].initialX = houses[houses.length - 1].x;
+      }
+
+      // Initialize 2 houses on right side
+      for (let i = 0; i < 2; i++) {
+        houses.push({
+          type: Math.floor(Math.random() * 4),
+          x: canvas.width * 0.75 + Math.random() * (canvas.width * 0.25),
+          y: 450 + Math.random() * 100,
+          initialY: 450 + Math.random() * 100,
+          initialX: 0,
+          speed: 0.3 + Math.random() * 0.4,
+          size: 100 + Math.random() * 50,
+          side: "right",
+        });
+        houses[houses.length - 1].initialX = houses[houses.length - 1].x;
+      }
+    }
+
+    function spawnNewHouse(side) {
+      const newHouse = {
+        type: Math.floor(Math.random() * 4),
+        y: 400 + Math.random() * 50, // Spawn near horizon
+        initialY: 400 + Math.random() * 50,
+        speed: 0.3 + Math.random() * 0.4,
+        size: 100 + Math.random() * 50,
+        side: side,
+      };
+
+      if (side === "left") {
+        newHouse.x = Math.random() * (canvas.width * 0.25);
+        newHouse.initialX = newHouse.x;
+      } else {
+        newHouse.x = canvas.width * 0.75 + Math.random() * (canvas.width * 0.25);
+        newHouse.initialX = newHouse.x;
+      }
+
+      houses.push(newHouse);
+    }
+
+    function updateHouses() {
+      if (!gameRunning || paused) return;
+
+      const roadTopY = 500;
+      const roadBottomY = canvas.height;
+      const roadTopWidth = canvas.width * 0.4;
+      const roadBottomWidth = canvas.width;
+
+      for (let i = houses.length - 1; i >= 0; i--) {
+        const house = houses[i];
+
+        house.y += game_speed * house.speed;
+
+        const t = Math.max(0, (house.y - roadTopY) / (roadBottomY - roadTopY));
+        const roadWidthAtY =
+          roadTopWidth + (roadBottomWidth - roadTopWidth) * t;
+
+        const centerX = canvas.width / 2;
+        const leftRoadEdge = centerX - roadWidthAtY / 2;
+        const rightRoadEdge = centerX + roadWidthAtY / 2;
+
+        const scaleIncrease = 1 + t * 8;
+        house.currentSize = house.size * scaleIncrease;
+
+        const awayOffset = 30 + t * 80 + scaleIncrease * 15;
+
+        if (house.side === "left") {
+          const roadAngleOffset =
+            (leftRoadEdge - (canvas.width / 2 - roadTopWidth / 2)) * t;
+          house.x = house.initialX + roadAngleOffset - awayOffset;
+        } else {
+          const roadAngleOffset =
+            (rightRoadEdge - (canvas.width / 2 + roadTopWidth / 2)) * t;
+          house.x = house.initialX + roadAngleOffset + awayOffset;
+        }
+
+        if (
+          house.y > canvas.height + 100 ||
+          house.x < -200 ||
+          house.x > canvas.width + 200
+        ) {
+          houses.splice(i, 1);
+        }
+      }
+
+      if (Math.random() < houseSpawnRate * (game_speed / 20)) {
+        if (Math.random() < 0.5) {
+          spawnNewHouse("left");
+        } else {
+          spawnNewHouse("right");
+        }
+      }
+    }
+
+    function drawHouses() {
+      const sortedHouses = [...houses].sort((a, b) => a.y - b.y);
+
+      sortedHouses.forEach((house) => {
+        if (house.y > 450) { // Start showing houses near road top
+          const houseImg = houseImages[house.type];
+          if (houseImg && houseImg.complete) {
+            const size = house.currentSize || house.size;
+            const alpha = Math.min(1, (house.y - 450) / 100); // Fade in from road top
+
+            // Draw 3D shadow for houses
+            ctx.globalAlpha = alpha * 0.4;
+            ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+            ctx.shadowBlur = 15 + (size / 10);
+            ctx.shadowOffsetX = 8;
+            ctx.shadowOffsetY = 8;
+
+            // Draw house shadow (ground ellipse)
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+            ctx.beginPath();
+            ctx.ellipse(
+              house.x,
+              house.y + size / 3,
+              size / 3,
+              size / 8,
+              0, 0, Math.PI * 2
+            );
+            ctx.fill();
+
+            // Draw house with depth
+            ctx.globalAlpha = alpha * 0.9;
+            ctx.drawImage(
+              houseImg,
+              house.x - size / 2,
+              house.y - size / 2,
+              size,
+              size
+            );
+
+            // Reset
+            ctx.globalAlpha = 1;
+            ctx.shadowColor = "transparent";
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+          }
+        }
+      });
+    }
+
     let paused = false;
     $scope.pause = false;
     let yellowLine = null;
@@ -981,6 +1149,7 @@ app.controller(
       lowFuelWarning = false;
       items.length = 0;
       trees.length = 0;
+      houses.length = 0;
       tuk.lane = "left";
       offset = 0;
       yellowLine = null;
@@ -1028,6 +1197,7 @@ app.controller(
         $scope.warn_msg = "";
       });
       initializeTrees();
+      initializeHouses();
       updateBars();
       gameOverModal.style.display = "none";
       animate();
@@ -1120,6 +1290,7 @@ app.controller(
       if (paused) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBackground();
+        drawHouses();
         drawTrees();
         drawRoad();
         if (doubleLineActive) {
@@ -1174,6 +1345,8 @@ app.controller(
       }
 
       drawBackground();
+      updateHouses();
+      drawHouses();
       updateTrees();
       drawTrees();
       drawRoad();
@@ -1253,6 +1426,7 @@ app.controller(
       $scope.page = 3;
       resizeCanvas();
       initializeTrees();
+      initializeHouses();
       updateBars();
 
       // Start 60 second timer
@@ -1288,6 +1462,7 @@ app.controller(
       $scope.page_change();
       resizeCanvas();
       initializeTrees();
+      initializeHouses();
       updateBars();
       animate();
       soundManager();
@@ -1300,6 +1475,7 @@ app.controller(
       $scope.page = 2;
       resizeCanvas();
       initializeTrees();
+      initializeHouses();
       updateBars();
       soundManager();
       $timeout(function () {
