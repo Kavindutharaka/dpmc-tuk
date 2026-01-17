@@ -9,6 +9,15 @@ app.controller(
     $scope.doubleLine = false;
     $scope.warn_msg = "";
 
+    // Form data initialization
+    $scope.formData = {
+      name: "",
+      phone: "",
+      vehicleNumber: "",
+      language: "en",
+      termsAccepted: false
+    };
+
     const canvas = document.getElementById("gameCanvas");
     canvas.style.touchAction = "none";
     const ctx = canvas.getContext("2d");
@@ -1563,6 +1572,13 @@ app.controller(
     }
 
     $scope.next = function () {
+      // Validate terms acceptance
+      if (!$scope.formData.termsAccepted) {
+        alert('Please accept the Terms & Conditions to continue.');
+        return;
+      }
+
+      console.log("Form data:", $scope.formData);
       $scope.page = 2;
       resizeCanvas();
       initializeTrees();
