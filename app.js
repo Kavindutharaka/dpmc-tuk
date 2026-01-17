@@ -136,7 +136,7 @@ app.controller(
           initialY: 480 + Math.random() * 200,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
-          size: 100 + Math.random() * 50, // Larger than trees
+          size: 50 + Math.random() * 25, // Start with smaller base size
           side: "left",
         });
         houses[houses.length - 1].initialX = houses[houses.length - 1].x;
@@ -151,7 +151,7 @@ app.controller(
           initialY: 480 + Math.random() * 200,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
-          size: 100 + Math.random() * 50,
+          size: 50 + Math.random() * 25,
           side: "right",
         });
         houses[houses.length - 1].initialX = houses[houses.length - 1].x;
@@ -164,7 +164,7 @@ app.controller(
         y: 480 + Math.random() * 30, // Spawn closer to road top
         initialY: 480 + Math.random() * 30,
         speed: 0.3 + Math.random() * 0.4,
-        size: 100 + Math.random() * 50,
+        size: 50 + Math.random() * 25, // Start with smaller base size
         side: side,
       };
 
@@ -192,6 +192,7 @@ app.controller(
 
         house.y += game_speed * house.speed;
 
+        // Calculate position ratio from top to bottom (0 to 1)
         const t = Math.max(0, (house.y - roadTopY) / (roadBottomY - roadTopY));
         const roadWidthAtY =
           roadTopWidth + (roadBottomWidth - roadTopWidth) * t;
@@ -200,7 +201,8 @@ app.controller(
         const leftRoadEdge = centerX - roadWidthAtY / 2;
         const rightRoadEdge = centerX + roadWidthAtY / 2;
 
-        const scaleIncrease = 1 + t * 8;
+        // Smooth scaling: houses grow from 1x at top to 5x at bottom
+        const scaleIncrease = 1 + t * 4;
         house.currentSize = house.size * scaleIncrease;
 
         const awayOffset = 30 + t * 80 + scaleIncrease * 15;
