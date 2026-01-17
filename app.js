@@ -124,7 +124,7 @@ app.controller(
     }
 
     const houses = [];
-    const houseSpawnRate = 0.02; // Spawn less frequently than trees
+    const houseSpawnRate = 0.005; // Spawn much less frequently than trees
 
     function initializeHouses() {
       // Initialize 2 houses on left side
@@ -132,8 +132,8 @@ app.controller(
         houses.push({
           type: Math.floor(Math.random() * 4), // 4 house images (h1-h4)
           x: Math.random() * (canvas.width * 0.25),
-          y: 450 + Math.random() * 100,
-          initialY: 450 + Math.random() * 100,
+          y: 480 + Math.random() * 200,
+          initialY: 480 + Math.random() * 200,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
           size: 100 + Math.random() * 50, // Larger than trees
@@ -147,8 +147,8 @@ app.controller(
         houses.push({
           type: Math.floor(Math.random() * 4),
           x: canvas.width * 0.75 + Math.random() * (canvas.width * 0.25),
-          y: 450 + Math.random() * 100,
-          initialY: 450 + Math.random() * 100,
+          y: 480 + Math.random() * 200,
+          initialY: 480 + Math.random() * 200,
           initialX: 0,
           speed: 0.3 + Math.random() * 0.4,
           size: 100 + Math.random() * 50,
@@ -161,8 +161,8 @@ app.controller(
     function spawnNewHouse(side) {
       const newHouse = {
         type: Math.floor(Math.random() * 4),
-        y: 400 + Math.random() * 50, // Spawn near horizon
-        initialY: 400 + Math.random() * 50,
+        y: 480 + Math.random() * 30, // Spawn closer to road top
+        initialY: 480 + Math.random() * 30,
         speed: 0.3 + Math.random() * 0.4,
         size: 100 + Math.random() * 50,
         side: side,
@@ -237,11 +237,11 @@ app.controller(
       const sortedHouses = [...houses].sort((a, b) => a.y - b.y);
 
       sortedHouses.forEach((house) => {
-        if (house.y > 450) { // Start showing houses near road top
+        if (house.y > 400) { // Start showing houses earlier to reach closer to road
           const houseImg = houseImages[house.type];
           if (houseImg && houseImg.complete) {
             const size = house.currentSize || house.size;
-            const alpha = Math.min(1, (house.y - 450) / 100); // Fade in from road top
+            const alpha = Math.min(1, (house.y - 400) / 100); // Fade in earlier
 
             // Draw 3D shadow for houses
             ctx.globalAlpha = alpha * 0.4;
