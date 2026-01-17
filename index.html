@@ -470,6 +470,55 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.2); }
     }
+
+    /* Top Notification Area */
+    .top-notification {
+      position: absolute;
+      top: 200px;
+      left: 50%;
+      transform: translateX(-50%) translateZ(60px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px 50px;
+      border-radius: 20px;
+      font-size: 45px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      max-width: 900px;
+      text-align: center;
+    }
+
+    .top-notification.show {
+      opacity: 1;
+    }
+
+    .top-notification.genuine {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.95) 0%, rgba(56, 142, 60, 0.95) 100%);
+      border: 3px solid #4caf50;
+    }
+
+    .top-notification.non-genuine {
+      background: linear-gradient(135deg, rgba(244, 67, 54, 0.95) 0%, rgba(211, 47, 47, 0.95) 100%);
+      border: 3px solid #ff4444;
+    }
+
+    .top-notification img {
+      width: 100px;
+      height: 100px;
+      margin-left: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .top-notification .notification-text {
+      flex: 1;
+    }
   </style>
 </head>
 
@@ -508,6 +557,13 @@
         </div>
         <div class="sound-icon" title="Toggle Sound"></div>
         <div ng-click="pause ? resumeGame() : pauseGame()" class="break-icon" title="Toggle Sound"></div>
+
+        <!-- Top Notification for Genuine/Non-Genuine Parts -->
+        <div id="topNotification" class="top-notification">
+          <div class="notification-text" id="notificationText"></div>
+          <img id="notificationImage" style="display: none;" />
+        </div>
+
         <canvas id="gameCanvas"></canvas>
         <div id="gameOverModal">
           <h2>GAME OVER!</h2>

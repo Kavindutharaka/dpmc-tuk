@@ -33,11 +33,45 @@ app.controller(
     let marks = 0;
     let showGoldenAnimation = false;
     let goldenAnimationTimer = 0;
+    let showRedAnimation = false;
+    let redAnimationTimer = 0;
 
     // Notification queue system to prevent overlapping modals
     let notificationQueue = [];
     let isShowingNotification = false;
     let currentNotificationType = null;
+
+    // Top notification system (non-blocking)
+    function showTopNotification(type, message, imagePath = null, duration = 2000) {
+      const topNotification = document.getElementById('topNotification');
+      const notificationText = document.getElementById('notificationText');
+      const notificationImage = document.getElementById('notificationImage');
+
+      if (!topNotification || !notificationText) return;
+
+      // Set message
+      notificationText.textContent = message;
+
+      // Set image if provided
+      if (imagePath && notificationImage) {
+        notificationImage.src = imagePath;
+        notificationImage.style.display = 'block';
+      } else if (notificationImage) {
+        notificationImage.style.display = 'none';
+      }
+
+      // Set type class
+      topNotification.classList.remove('genuine', 'non-genuine');
+      topNotification.classList.add(type);
+
+      // Show notification
+      topNotification.classList.add('show');
+
+      // Auto hide after duration
+      setTimeout(() => {
+        topNotification.classList.remove('show');
+      }, duration);
+    }
 
     const lineSpacing = 140;
     const lineHeight = 120;
@@ -900,6 +934,53 @@ app.controller(
       }
     }
 
+    function drawRedAnimation() {
+      if (showRedAnimation && redAnimationTimer > 0) {
+        redAnimationTimer--;
+
+        // Calculate pulse scale
+        const scale = 1 + (Math.sin(redAnimationTimer * 0.3) * 0.2);
+
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.font = `bold ${100 * scale}px Arial`;
+
+        // Red glow
+        ctx.shadowColor = "rgba(255, 0, 0, 0.8)";
+        ctx.shadowBlur = 40;
+
+        // Draw -5
+        const alpha = redAnimationTimer / 60;
+        ctx.globalAlpha = alpha;
+
+        // Shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillText("-5", canvas.width / 2 + 8, canvas.height / 2 + 8);
+
+        // Outline
+        ctx.strokeStyle = "#8B0000";
+        ctx.lineWidth = 8;
+        ctx.strokeText("-5", canvas.width / 2, canvas.height / 2);
+
+        // Red gradient
+        const redGradient = ctx.createLinearGradient(
+          canvas.width / 2 - 50, canvas.height / 2 - 50,
+          canvas.width / 2 + 50, canvas.height / 2 + 50
+        );
+        redGradient.addColorStop(0, "#FF4444");
+        redGradient.addColorStop(0.5, "#FF0000");
+        redGradient.addColorStop(1, "#FF4444");
+        ctx.fillStyle = redGradient;
+        ctx.fillText("-5", canvas.width / 2, canvas.height / 2);
+
+        ctx.restore();
+
+        if (redAnimationTimer <= 0) {
+          showRedAnimation = false;
+        }
+      }
+    }
+
     function checkCollision(item, tuk) {
       return (
         item.x < tuk.x + item.width &&
@@ -984,14 +1065,19 @@ app.controller(
               item.collected = true;
               showGoldenAnimation = true;
               goldenAnimationTimer = 60; // Show for 1 second (60 frames)
+
+              // Show top notification without pausing
+              showTopNotification('genuine', 'This is GENUINE! +10 Marks', null, 2000);
               console.log("Genuine part collected! +10 marks");
             } else if (item.type === "nongenuine") {
-              // Wrong non-genuine part - subtract marks and show alert
+              // Wrong non-genuine part - subtract marks and show red animation
               marks = Math.max(0, marks - 5);
               item.collected = true;
+              showRedAnimation = true;
+              redAnimationTimer = 60; // Show for 1 second (60 frames)
 
-              // Show alert using notification queue
-              showNotification('wrongpart', '', nonGenuinePartsPaths[item.partIndex], 2000);
+              // Show top notification with image without pausing
+              showTopNotification('non-genuine', 'This is NOT GENUINE! -5 Marks', nonGenuinePartsPaths[item.partIndex], 2000);
               console.log("Non-genuine part collected! -5 marks");
             } else if (item.type === "barrier") {
               $scope.msg = "බාධකයක හැපුණා!"; // Barrier collision message
@@ -1166,6 +1252,8 @@ app.controller(
       yellowLineSpawned = false;
       showGoldenAnimation = false;
       goldenAnimationTimer = 0;
+      showRedAnimation = false;
+      redAnimationTimer = 0;
       $scope.msg = ""; // Clear game over message
 
       // Clear notification system
@@ -1377,6 +1465,7 @@ app.controller(
       drawTuk();
       drawScore();
       drawGoldenAnimation(); // Draw golden animation on top
+      drawRedAnimation(); // Draw red animation on top
 
       if (gameRunning) {
         fuel = Math.max(0, fuel - fuelDecreaseRate);
