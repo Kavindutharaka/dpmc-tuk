@@ -251,6 +251,28 @@
       transform: translateZ(50px);
     }
 
+    .game-logo {
+      position: absolute;
+      top: 40px;
+      right: 40px;
+      width: 150px;
+      height: 150px;
+      z-index: 5;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
+      transform: translateZ(50px);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                  inset 0 2px 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .game-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
     .bar-icon {
       width: 70px;
       height: 70px;
@@ -651,6 +673,12 @@
             <div class="bar-fill fuel-fill" id="fuelBar"></div>
           </div>
         </div>
+
+        <!-- Game Logo - Top Right Corner -->
+        <div class="game-logo">
+          <img src="g_logo.png" alt="Game Logo" />
+        </div>
+
         <div class="sound-icon" title="Toggle Sound"></div>
         <div ng-click="pause ? resumeGame() : pauseGame()" class="break-icon" title="Toggle Sound"></div>
 
