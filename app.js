@@ -18,6 +18,13 @@ app.controller(
       termsAccepted: false
     };
 
+    // Music selection
+    $scope.selectedMusic = null;
+    $scope.selectMusic = function(musicId) {
+      $scope.selectedMusic = musicId;
+      console.log("Selected music:", musicId);
+    };
+
     const canvas = document.getElementById("gameCanvas");
     canvas.style.touchAction = "none";
     const ctx = canvas.getContext("2d");
@@ -94,8 +101,36 @@ app.controller(
     let inSafeRange = false;
     let yellowLineSpawned = false;
 
-    var sindu = new Audio("./audio/radio.mp3");
+    var sindu = null; // Will be initialized based on music selection
     var tuk_sound = new Audio("./audio/tuk_sound.mp3");
+
+    // Initialize music based on selection
+    function initializeMusic() {
+      if ($scope.selectedMusic === 0) {
+        // No music selected
+        sindu = null;
+        return;
+      } else if ($scope.selectedMusic >= 1 && $scope.selectedMusic <= 5) {
+        // Load selected song
+        sindu = new Audio(`song/${$scope.selectedMusic}.mp3`);
+      } else {
+        // Fallback to no music if nothing selected
+        sindu = null;
+      }
+    }
+
+    // Helper functions for music playback
+    function playMusic() {
+      if (sindu) {
+        sindu.play();
+      }
+    }
+
+    function pauseMusic() {
+      if (sindu) {
+        sindu.pause();
+      }
+    }
 
     const items = [];
 
@@ -1120,7 +1155,7 @@ app.controller(
       currentNotificationType = type;
       paused = true;
       $scope.pause = true;
-      sindu.pause();
+      pauseMusic();
       tuk_sound.pause();
 
       $timeout(function() {
@@ -1306,7 +1341,7 @@ app.controller(
       if (gameRunning && !paused) {
         paused = true;
         $scope.pause = true;
-        sindu.pause();
+        pauseMusic();
         tuk_sound.pause();
         console.log("Game paused");
         if (inSafeRange && yellowLine && !isShowingNotification) {
@@ -1324,7 +1359,7 @@ app.controller(
       if (gameRunning && paused) {
         paused = false;
         $scope.pause = false;
-        sindu.play();
+        playMusic();
         tuk_sound.play();
         animate();
         console.log("Game resumed");
@@ -1549,7 +1584,7 @@ app.controller(
 
       animate();
       soundManager();
-      sindu.play();
+      playMusic();
       tuk_sound.play();
       $scope.sound_rep();
     };
@@ -1566,7 +1601,7 @@ app.controller(
       updateBars();
       animate();
       soundManager();
-      sindu.play();
+      playMusic();
       tuk_sound.play();
       $scope.sound_rep();
     }
@@ -1579,37 +1614,52 @@ app.controller(
       }
 
       console.log("Form data:", $scope.formData);
+      // Go to music selection page
       $scope.page = 2;
+    };
+
+    // Start game after music selection
+    $scope.startGame = function () {
+      if ($scope.selectedMusic === null) {
+        alert('Please select a music option to continue.');
+        return;
+      }
+
+      console.log("Starting game with music:", $scope.selectedMusic);
+
+      // Initialize the selected music
+      initializeMusic();
+
+      // Go to game page
+      $scope.page = 3;
       resizeCanvas();
       initializeTrees();
       initializeHouses();
       updateBars();
       soundManager();
-      $timeout(function () {
-        sindu.play();
-        tuk_sound.play();
-        $scope.page = 3;
 
-        // Start 60 second timer
-        gameTimer = 60;
-        if (timerInterval) {
-          clearInterval(timerInterval);
-        }
-        timerInterval = setInterval(() => {
-          if (gameRunning && !paused) {
-            gameTimer--;
-            if (gameTimer <= 0) {
-              gameTimer = 0;
-              clearInterval(timerInterval);
-              timerInterval = null;
-              $scope.msg = "Time's up!";
-              gameOver();
-            }
+      // Start 60 second timer
+      gameTimer = 60;
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      timerInterval = setInterval(() => {
+        if (gameRunning && !paused) {
+          gameTimer--;
+          if (gameTimer <= 0) {
+            gameTimer = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            $scope.msg = "Time's up!";
+            gameOver();
           }
-        }, 1000);
+        }
+      }, 1000);
 
-        animate();
-      }, 6000);
+      animate();
+      playMusic();
+      tuk_sound.play();
+      $scope.sound_rep();
     };
 
     function resizeCanvas() {
@@ -1629,11 +1679,11 @@ app.controller(
       let isPlaying = false;
       soundIcon.addEventListener("click", function () {
         if (isPlaying) {
-          sindu.pause();
+          pauseMusic();
           tuk_sound.pause();
           soundIcon.classList.add("muted");
         } else {
-          sindu.play();
+          playMusic();
           tuk_sound.play();
           soundIcon.classList.remove("muted");
         }
@@ -1649,11 +1699,11 @@ app.controller(
       let isPlaying = false;
       soundIcon.addEventListener("click", function () {
         if (isPlaying) {
-          sindu.pause();
+          pauseMusic();
           tuk_sound.pause();
           soundIcon.classList.add("muted");
         } else {
-          sindu.play();
+          playMusic();
           tuk_sound.play();
           soundIcon.classList.remove("muted");
         }
