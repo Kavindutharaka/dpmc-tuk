@@ -181,8 +181,8 @@ app.controller(
       y: 0,
       x: 0,
       targetX: 0, // For smooth transitions
-      width: 160,
-      height: 280,
+      width: 200, // Increased from 160 for better visibility
+      height: 350, // Increased from 280 for better visibility
       transitionSpeed: 0.15 // Smooth transition factor (0-1, higher = faster)
     };
 
@@ -1100,7 +1100,8 @@ app.controller(
             height: tuk.height / 3,
           };
 
-          if (checkCollision(itemRect, tukRect) && tuk.lane === item.lane) {
+          // Use position-based collision detection (no lane check needed with smooth transitions)
+          if (checkCollision(itemRect, tukRect)) {
             if (item.type === "fuel") {
               fuel = 100;
               lowFuelWarning = false;
@@ -1506,7 +1507,7 @@ app.controller(
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      tuk.y = canvas.height - 180; // Adjusted for larger tuk size
+      tuk.y = canvas.height - 220; // Adjusted for larger tuk size (200x350)
 
       // Animate middle line offset for scrolling effect
       offset += game_speed;
