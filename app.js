@@ -1630,36 +1630,54 @@ app.controller(
       // Initialize the selected music
       initializeMusic();
 
+      // Reset game state to ensure clean start
+      gameRunning = true;
+      paused = false;
+      $scope.pause = false;
+      game_speed = 5;
+      marks = 0;
+      fuel = 100;
+      items.length = 0;
+      trees.length = 0;
+      houses.length = 0;
+      tuk.lane = "left";
+
       // Go to game page
       $scope.page = 3;
-      resizeCanvas();
-      initializeTrees();
-      initializeHouses();
-      updateBars();
-      soundManager();
 
-      // Start 60 second timer
-      gameTimer = 60;
-      if (timerInterval) {
-        clearInterval(timerInterval);
-      }
-      timerInterval = setInterval(() => {
-        if (gameRunning && !paused) {
-          gameTimer--;
-          if (gameTimer <= 0) {
-            gameTimer = 0;
-            clearInterval(timerInterval);
-            timerInterval = null;
-            $scope.msg = "Time's up!";
-            gameOver();
-          }
+      // Wait for page to render before initializing game
+      $timeout(function() {
+        resizeCanvas();
+        initializeTrees();
+        initializeHouses();
+        updateBars();
+        soundManager();
+
+        console.log("Game starting - paused:", paused, "gameRunning:", gameRunning);
+
+        // Start 60 second timer
+        gameTimer = 60;
+        if (timerInterval) {
+          clearInterval(timerInterval);
         }
-      }, 1000);
+        timerInterval = setInterval(() => {
+          if (gameRunning && !paused) {
+            gameTimer--;
+            if (gameTimer <= 0) {
+              gameTimer = 0;
+              clearInterval(timerInterval);
+              timerInterval = null;
+              $scope.msg = "Time's up!";
+              gameOver();
+            }
+          }
+        }, 1000);
 
-      animate();
-      playMusic();
-      tuk_sound.play();
-      $scope.sound_rep();
+        animate();
+        playMusic();
+        tuk_sound.play();
+        $scope.sound_rep();
+      }, 100); // 100ms delay to ensure DOM is ready
     };
 
     function resizeCanvas() {
@@ -1672,10 +1690,15 @@ app.controller(
       }
     }
 
+    let soundManagerInitialized = false;
     function soundManager() {
+      if (soundManagerInitialized) return; // Only attach listener once
+
       const loop_start = 5;
       const loop_end = 10;
       const soundIcon = document.querySelector(".sound-icon");
+      if (!soundIcon) return;
+
       let isPlaying = false;
       soundIcon.addEventListener("click", function () {
         if (isPlaying) {
@@ -1689,26 +1712,10 @@ app.controller(
         }
         isPlaying = !isPlaying;
       });
+      soundManagerInitialized = true;
     }
 
     // Fixed canvas dimensions for kiosk - no need for resize listeners
     window.addEventListener("load", resizeCanvas);
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const soundIcon = document.querySelector(".sound-icon");
-      let isPlaying = false;
-      soundIcon.addEventListener("click", function () {
-        if (isPlaying) {
-          pauseMusic();
-          tuk_sound.pause();
-          soundIcon.classList.add("muted");
-        } else {
-          playMusic();
-          tuk_sound.play();
-          soundIcon.classList.remove("muted");
-        }
-        isPlaying = !isPlaying;
-      });
-    });
   }
 );
