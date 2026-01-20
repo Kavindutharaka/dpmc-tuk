@@ -177,10 +177,13 @@ app.controller(
     const tukImg = new Image();
     const tuk = {
       lane: "left",
+      targetLane: "left", // For smooth transitions
       y: 0,
       x: 0,
+      targetX: 0, // For smooth transitions
       width: 160,
       height: 280,
+      transitionSpeed: 0.15 // Smooth transition factor (0-1, higher = faster)
     };
 
     const treeImages = [];
@@ -1145,6 +1148,11 @@ app.controller(
 
     // Notification queue management system
     function showNotification(type, message, imagePath = null, duration = 2000) {
+      // Don't show notifications if game is over
+      if (!gameRunning) {
+        return;
+      }
+
       // If a notification is currently showing, queue this one
       if (isShowingNotification) {
         notificationQueue.push({ type, message, imagePath, duration });
@@ -1214,7 +1222,17 @@ app.controller(
     }
 
     function drawTuk() {
-      tuk.x = getLaneX(tuk.y, tuk.lane);
+      // Smooth transition to target lane
+      tuk.targetX = getLaneX(tuk.y, tuk.targetLane);
+
+      // Lerp (linear interpolation) for smooth movement
+      if (Math.abs(tuk.x - tuk.targetX) > 1) {
+        tuk.x += (tuk.targetX - tuk.x) * tuk.transitionSpeed;
+      } else {
+        tuk.x = tuk.targetX;
+        tuk.lane = tuk.targetLane; // Update actual lane when transition complete
+      }
+
       if (tukImg.complete) {
         // Draw 3D shadow for the tuk
         ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
@@ -1255,6 +1273,12 @@ app.controller(
 
     function gameOver() {
       gameRunning = false;
+      paused = true; // Ensure game is fully paused
+
+      // Stop ALL sounds immediately
+      pauseMusic();
+      tuk_sound.pause();
+      tuk_sound.currentTime = 0; // Reset tuk sound to beginning
 
       // Stop timer
       if (timerInterval) {
@@ -1262,15 +1286,23 @@ app.controller(
         timerInterval = null;
       }
 
-      // Show final marks instead of score
-      finalScoreEl.textContent = `Final Marks: ${marks}`;
-      gameOverModal.style.display = "block";
+      // Clear all notifications and prevent new ones
+      clearNotificationQueue();
+      isShowingNotification = false;
+
+      // Close any open notifications
       $timeout(function () {
         $scope.crossLnHit = false;
+        $scope.showAppreciation = false;
+        $scope.showWrongPartAlert = false;
         $scope.warn_msg = "";
         yellowLinePaused = false;
         inSafeRange = false;
       });
+
+      // Show final marks instead of score
+      finalScoreEl.textContent = `Final Marks: ${marks}`;
+      gameOverModal.style.display = "block";
     }
 
     function resetGame() {
@@ -1283,6 +1315,9 @@ app.controller(
       trees.length = 0;
       houses.length = 0;
       tuk.lane = "left";
+      tuk.targetLane = "left"; // Reset target lane
+      tuk.x = getLaneX(tuk.y, "left"); // Reset position
+      tuk.targetX = tuk.x;
       offset = 0;
       yellowLine = null;
       paused = false;
@@ -1344,7 +1379,8 @@ app.controller(
         pauseMusic();
         tuk_sound.pause();
         console.log("Game paused");
-        if (inSafeRange && yellowLine && !isShowingNotification) {
+        // Only show appreciation if game is still running
+        if (gameRunning && inSafeRange && yellowLine && !isShowingNotification) {
           yellowLine = null;
           showNotification('appreciation', 'Good job stopping! 🎉', null, 2000);
           $timeout(function () {
@@ -1367,8 +1403,8 @@ app.controller(
     };
 
     canvas.addEventListener("swiped-left", () => {
-      if (gameRunning && !paused && tuk.lane === "right") {
-        tuk.lane = "left";
+      if (gameRunning && !paused && tuk.targetLane === "right") {
+        tuk.targetLane = "left"; // Set target lane for smooth transition
         if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
           doubleLineLogged = true;
           showNotification('warning', 'You crossed the Double line!!!', null, 2000);
@@ -1385,8 +1421,8 @@ app.controller(
     });
 
     canvas.addEventListener("swiped-right", () => {
-      if (gameRunning && !paused && tuk.lane === "left") {
-        tuk.lane = "right";
+      if (gameRunning && !paused && tuk.targetLane === "left") {
+        tuk.targetLane = "right"; // Set target lane for smooth transition
         if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
           doubleLineLogged = true;
           showNotification('warning', 'You crossed the Double line!!!', null, 2000);
@@ -1493,7 +1529,8 @@ app.controller(
           doubleLineTimer = 0;
           doubleLineLogged = false;
           barrierCooldown = 2000;
-          if (!wasDoubleLineLogged && !isShowingNotification) {
+          // Only show appreciation if game is still running
+          if (gameRunning && !wasDoubleLineLogged && !isShowingNotification) {
             showNotification('appreciation', 'Excellent! You stayed in your lane! 🎉', null, 2000);
             console.log("Good job!");
           }
@@ -1641,6 +1678,8 @@ app.controller(
       trees.length = 0;
       houses.length = 0;
       tuk.lane = "left";
+      tuk.targetLane = "left";
+      tuk.targetX = 0;
 
       // Go to game page
       $scope.page = 3;
