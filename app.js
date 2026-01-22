@@ -14,7 +14,6 @@ app.controller(
       name: "",
       phone: "",
       vehicleNumber: "",
-      language: "en",
       termsAccepted: true // Default to checked
     };
 
@@ -1137,7 +1136,7 @@ app.controller(
               showTopNotification('non-genuine', 'This is NOT GENUINE! -5 Marks', nonGenuinePartsPaths[item.partIndex], 2000);
               console.log("Non-genuine part collected! -5 marks");
             } else if (item.type === "barrier") {
-              $scope.msg = "බාධකයක හැපුණා!"; // Barrier collision message
+              $scope.msg = "Hit a Barrier!";
               gameOver();
               return;
             }
@@ -1601,7 +1600,7 @@ app.controller(
 
         // Game over only on fuel out
         if (fuel <= 0) {
-          $scope.msg = "තෙල් නෑ!";
+          $scope.msg = "Out of Fuel!";
           $timeout(function () {
             gameOver();
           });
