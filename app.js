@@ -178,6 +178,9 @@ app.controller(
 
     const itemTypes = ["barrier", "fuel", "genuine", "nongenuine"];
     const spawnInterval = 1500;
+
+    // Win control system - only 1 in 5 players should be able to win
+    let isEligibleToWin = false;
     const itemImages = {
       barrier: new Image(),
       fuel: new Image(),
@@ -588,10 +591,41 @@ app.controller(
       if (fuel < 30 && !lowFuelWarning) {
         type = "fuel";
       } else {
-        const availableTypes = doubleLineActive || barrierCooldown > 0
-          ? itemTypes.filter(t => t !== "barrier")
-          : itemTypes;
-        type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        // Win control system - adjust spawn probabilities based on eligibility
+        const rand = Math.random();
+
+        if (isEligibleToWin) {
+          // Normal difficulty - equal chances for eligible players
+          const availableTypes = doubleLineActive || barrierCooldown > 0
+            ? itemTypes.filter(t => t !== "barrier")
+            : itemTypes;
+          type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        } else {
+          // Harder difficulty for non-eligible players
+          // Weighted probabilities: barrier 30%, fuel 20%, genuine 15%, nongenuine 35%
+          if (doubleLineActive || barrierCooldown > 0) {
+            // No barriers during double line or cooldown
+            // Adjusted: fuel 28.5%, genuine 21.5%, nongenuine 50%
+            if (rand < 0.285) {
+              type = "fuel";
+            } else if (rand < 0.5) {
+              type = "genuine";
+            } else {
+              type = "nongenuine";
+            }
+          } else {
+            // Normal spawn with weighted probabilities
+            if (rand < 0.30) {
+              type = "barrier";
+            } else if (rand < 0.50) {
+              type = "fuel";
+            } else if (rand < 0.65) {
+              type = "genuine";
+            } else {
+              type = "nongenuine";
+            }
+          }
+        }
 
         // If it's a genuine or non-genuine part, pick a random image
         if (type === "genuine") {
@@ -1312,6 +1346,14 @@ app.controller(
       // Save game data to CSV
       saveGameData();
 
+      // Update win count if player was eligible and achieved 100+ marks
+      if (isEligibleToWin && marks >= 100) {
+        let gameStats = JSON.parse(localStorage.getItem('gameStats') || '{"totalPlayers":0,"totalWins":0}');
+        gameStats.totalWins++;
+        localStorage.setItem('gameStats', JSON.stringify(gameStats));
+        console.log(`Player won! Total wins: ${gameStats.totalWins}/${gameStats.totalPlayers}`);
+      }
+
       // Show final marks instead of score
       finalScoreEl.textContent = `Final Marks: ${marks}`;
       gameOverModal.style.display = "block";
@@ -1697,6 +1739,32 @@ app.controller(
 
       // Initialize the selected music
       initializeMusic();
+
+      // Win control system - determine if player is eligible to win (1 in 5 ratio)
+      let gameStats = localStorage.getItem('gameStats');
+      if (!gameStats) {
+        gameStats = { totalPlayers: 0, totalWins: 0 };
+      } else {
+        gameStats = JSON.parse(gameStats);
+      }
+
+      // Increment player count
+      gameStats.totalPlayers++;
+
+      // Determine eligibility: Allow win if we need to catch up to 1:5 ratio
+      // Calculate if this player should be allowed to win
+      const targetWins = Math.floor(gameStats.totalPlayers / 5);
+      isEligibleToWin = gameStats.totalWins < targetWins;
+
+      // If player is at exactly the 5th position (5, 10, 15, 20...), they are eligible
+      if (gameStats.totalPlayers % 5 === 0) {
+        isEligibleToWin = true;
+      }
+
+      // Save updated stats
+      localStorage.setItem('gameStats', JSON.stringify(gameStats));
+
+      console.log(`Player #${gameStats.totalPlayers} - Eligible to win: ${isEligibleToWin} (Total wins so far: ${gameStats.totalWins})`);
 
       // Reset game state to ensure clean start
       gameRunning = true;
