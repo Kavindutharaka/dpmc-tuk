@@ -738,6 +738,85 @@
       margin-top: 40px;
       transform: translateZ(30px);
     }
+
+    /* Terms and Conditions Modal */
+    .terms-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .terms-modal-content {
+      background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(0, 0, 0, 0.98) 100%);
+      border: 3px solid #3498db;
+      border-radius: 20px;
+      padding: 60px;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8),
+                  inset 0 0 50px rgba(52, 152, 219, 0.2);
+      transform: translateZ(100px);
+    }
+
+    .terms-modal-title {
+      font-size: 60px;
+      font-weight: bold;
+      color: #3498db;
+      margin-bottom: 40px;
+      text-align: center;
+      text-shadow: 0 4px 10px rgba(52, 152, 219, 0.5);
+    }
+
+    .terms-modal-text {
+      font-size: 32px;
+      line-height: 1.8;
+      color: white;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .terms-modal-text label {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 30px;
+      gap: 15px;
+    }
+
+    .terms-modal-checkbox {
+      min-width: 30px;
+      min-height: 30px;
+      margin-top: 5px;
+    }
+
+    .terms-modal-close {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      border: none;
+      padding: 25px 60px;
+      font-size: 40px;
+      font-weight: bold;
+      border-radius: 15px;
+      cursor: pointer;
+      display: block;
+      margin: 40px auto 0;
+      box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .terms-modal-close:hover {
+      background: linear-gradient(135deg, #52b8ff 0%, #3498db 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(52, 152, 219, 0.7);
+    }
   </style>
 </head>
 
@@ -767,7 +846,7 @@
           <div class="terms-container">
             <input type="checkbox" class="terms-checkbox" id="termsCheckbox" ng-model="formData.termsAccepted" />
             <label for="termsCheckbox" class="terms-label">
-              I accept the <a href="#" onclick="return false;">Terms & Conditions</a>
+              I accept the <a href="#" ng-click="openTermsModal(); $event.stopPropagation();">Terms & Conditions</a>
             </label>
           </div>
         </div>
@@ -880,12 +959,31 @@
       </div>
     </div>
   </div>
+
+  <!-- Terms and Conditions Modal -->
+  <div ng-show="showTermsModal" class="terms-modal" ng-click="closeTermsModal()">
+    <div class="terms-modal-content" ng-click="$event.stopPropagation()">
+      <h2 class="terms-modal-title">Terms & Conditions</h2>
+      <div class="terms-modal-text">
+        <label>
+          <span>☐</span>
+          <span>I hereby grant my consent for the collection, processing, and use of my personal data for the purpose of responding to inquiries and providing relevant assistance regarding the products or services of the David Pieris Motor Company (Pvt) Ltd, in accordance with the laws of Sri Lanka and the Data Protection Policy of "David Pieris Group of Companies."</span>
+        </label>
+        <label>
+          <span>☐</span>
+          <span>I hereby grant my consent to David Pieris Motor Company (Pvt) Ltd to use my Personal Data for marketing, promotion, and communication purposes.</span>
+        </label>
+      </div>
+      <button class="terms-modal-close" ng-click="closeTermsModal()">Close</button>
+    </div>
+  </div>
+
   <!--<div ng-hide="true">
         <img src="barrier.png" />
         <img src="center-tuk.png" />
         <img src="fuel.png" />
         <img src="gear.png" />
-    
+
     </div>-->
 </body>
 
