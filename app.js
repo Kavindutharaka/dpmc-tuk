@@ -104,6 +104,7 @@ app.controller(
     let doubleLineActive = false;
     let doubleLineTimer = 0;
     let doubleLineLogged = false;
+    let doubleLineAppreciationCount = 0; // Track number of appreciation messages shown (max 2)
     let barrierCooldown = 0;
     let yellowLinePaused = false;
     let inSafeRange = false;
@@ -1531,6 +1532,7 @@ app.controller(
       doubleLineActive = false;
       doubleLineTimer = 0;
       doubleLineLogged = false;
+      doubleLineAppreciationCount = 0; // Reset appreciation message counter
       barrierCooldown = 0;
       yellowLinePaused = false;
       inSafeRange = false;
@@ -1670,34 +1672,36 @@ app.controller(
         drawTuk();
         drawScore();
 
-        // 3D Paused text
-        ctx.textAlign = "center";
-        ctx.font = "bold 120px Arial";
+        // 3D Paused text - only show if no notification is currently displayed
+        if (!isShowingNotification) {
+          ctx.textAlign = "center";
+          ctx.font = "bold 120px Arial";
 
-        // Shadow layer
-        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-        ctx.fillText("PAUSED", canvas.width / 2 + 8, canvas.height / 2 + 8);
+          // Shadow layer
+          ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+          ctx.fillText("PAUSED", canvas.width / 2 + 8, canvas.height / 2 + 8);
 
-        // Outline
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 10;
-        ctx.strokeText("PAUSED", canvas.width / 2, canvas.height / 2);
+          // Outline
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 10;
+          ctx.strokeText("PAUSED", canvas.width / 2, canvas.height / 2);
 
-        // Gradient fill
-        const pauseGradient = ctx.createLinearGradient(
-          0, canvas.height / 2 - 60,
-          0, canvas.height / 2 + 60
-        );
-        pauseGradient.addColorStop(0, "#FFD700");
-        pauseGradient.addColorStop(0.5, "#FFFFFF");
-        pauseGradient.addColorStop(1, "#FFD700");
-        ctx.fillStyle = pauseGradient;
-        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+          // Gradient fill
+          const pauseGradient = ctx.createLinearGradient(
+            0, canvas.height / 2 - 60,
+            0, canvas.height / 2 + 60
+          );
+          pauseGradient.addColorStop(0, "#FFD700");
+          pauseGradient.addColorStop(0.5, "#FFFFFF");
+          pauseGradient.addColorStop(1, "#FFD700");
+          ctx.fillStyle = pauseGradient;
+          ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
 
-        // Highlight
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
-        ctx.lineWidth = 3;
-        ctx.strokeText("PAUSED", canvas.width / 2 - 2, canvas.height / 2 - 2);
+          // Highlight
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+          ctx.lineWidth = 3;
+          ctx.strokeText("PAUSED", canvas.width / 2 - 2, canvas.height / 2 - 2);
+        }
         return;
       }
 
@@ -1726,10 +1730,11 @@ app.controller(
           doubleLineTimer = 0;
           doubleLineLogged = false;
           barrierCooldown = 2000;
-          // Only show appreciation if game is still running
-          if (gameRunning && !wasDoubleLineLogged && !isShowingNotification) {
-            showNotification('appreciation', 'Excellent! You stayed in your lane! 🎉', null, 2000);
-            console.log("Good job!");
+          // Only show appreciation if game is still running and count < 2
+          if (gameRunning && !wasDoubleLineLogged && !isShowingNotification && doubleLineAppreciationCount < 2) {
+            showNotification('appreciation', 'Excellent! You stayed in your lane! 🎉', null, 3000);
+            doubleLineAppreciationCount++; // Increment counter
+            console.log(`Good job! (${doubleLineAppreciationCount}/2 messages shown)`);
           }
         }
       } else {
@@ -1929,6 +1934,7 @@ app.controller(
       tuk.lane = "left";
       tuk.targetLane = "left";
       tuk.targetX = 0;
+      doubleLineAppreciationCount = 0; // Reset appreciation message counter
 
       // Go to game page
       $scope.page = 3;
