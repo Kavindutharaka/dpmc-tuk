@@ -45,7 +45,7 @@ app.controller(
     const tryAgainBtn = document.getElementById("tryAgainBtn");
 
     let fuel = 100;
-    const fuelDecreaseRate = 0.1;
+    const fuelDecreaseRate = 0.05; // Reduced from 0.1 to give ~33 seconds of gameplay instead of ~17
     const fuelBar = document.getElementById("fuelBar");
     let lowFuelWarning = false;
 
