@@ -588,8 +588,24 @@ app.controller(
       let type;
       let partIndex = 0;
 
-      if (fuel < 30 && !lowFuelWarning) {
+      // Guaranteed fuel spawn system based on fuel level
+      // The lower the fuel, the higher chance of fuel spawning
+      // This ensures players always have opportunities to refuel
+      let fuelSpawnChance = 0;
+      if (fuel < 15) {
+        fuelSpawnChance = 0.80; // 80% chance when critically low
+      } else if (fuel < 30) {
+        fuelSpawnChance = 0.60; // 60% chance when low
+      } else if (fuel < 50) {
+        fuelSpawnChance = 0.40; // 40% chance when getting low
+      }
+
+      const shouldSpawnFuel = Math.random() < fuelSpawnChance;
+
+      if (shouldSpawnFuel) {
+        // Force spawn fuel when fuel is low
         type = "fuel";
+        console.log(`Fuel low (${fuel.toFixed(1)}%) - Spawning fuel with ${(fuelSpawnChance * 100)}% priority`);
       } else {
         // Win control system - adjust spawn probabilities based on eligibility
         const rand = Math.random();
