@@ -1500,6 +1500,7 @@ app.controller(
     }
 
     function resetGame() {
+      window.location.reload();
       // Stop the game completely
       gameRunning = false;
       paused = true;
