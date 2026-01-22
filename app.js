@@ -1420,6 +1420,10 @@ app.controller(
       // Save game data to CSV
       saveGameData();
 
+      // Set loss flag
+      $scope.isWin = false;
+      $scope.$apply(); // Update Angular scope
+
       // Show final marks instead of score
       finalScoreEl.textContent = `Final Marks: ${marks}`;
       gameOverModal.style.display = "block";
@@ -1466,8 +1470,12 @@ app.controller(
         console.log(`Player WON! Total wins: ${gameStats.totalWins}/${gameStats.totalPlayers}`);
       }
 
-      // Show final marks with WIN message
-      finalScoreEl.textContent = `YOU WIN! Final Marks: ${marks}`;
+      // Set win flag
+      $scope.isWin = true;
+      $scope.$apply(); // Update Angular scope
+
+      // Show final marks
+      finalScoreEl.textContent = `Final Marks: ${marks}`;
       gameOverModal.style.display = "block";
     }
 
@@ -1491,7 +1499,22 @@ app.controller(
     }
 
     function resetGame() {
-      gameRunning = true;
+      // Stop the game completely
+      gameRunning = false;
+      paused = true;
+
+      // Stop all sounds
+      pauseMusic();
+      tuk_sound.pause();
+      tuk_sound.currentTime = 0;
+
+      // Clear timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      // Clear all game state
       game_speed = 5;
       marks = 0;
       fuel = 100;
@@ -1500,13 +1523,11 @@ app.controller(
       trees.length = 0;
       houses.length = 0;
       tuk.lane = "left";
-      tuk.targetLane = "left"; // Reset target lane
-      tuk.x = getLaneX(tuk.y, "left"); // Reset position
-      tuk.targetX = tuk.x;
+      tuk.targetLane = "left";
+      tuk.x = 0;
+      tuk.targetX = 0;
       offset = 0;
       yellowLine = null;
-      paused = false;
-      $scope.pause = false;
       doubleLineActive = false;
       doubleLineTimer = 0;
       doubleLineLogged = false;
@@ -1518,43 +1539,34 @@ app.controller(
       goldenAnimationTimer = 0;
       showRedAnimation = false;
       redAnimationTimer = 0;
-      $scope.msg = ""; // Clear game over message
+      gameTimer = 60;
 
-      // Clear notification system
+      // Clear notifications
       clearNotificationQueue();
       $scope.showWrongPartAlert = false;
       $scope.showAppreciation = false;
       $scope.crossLnHit = false;
+      $scope.msg = "";
+      $scope.warn_msg = "";
 
-      // Reset timer to 60 seconds
-      gameTimer = 60;
-      if (timerInterval) {
-        clearInterval(timerInterval);
-      }
+      // Reset form data for fresh start
+      $scope.formData = {
+        name: "",
+        phone: "",
+        termsAccepted: true
+      };
 
-      // Start 60 second countdown
-      timerInterval = setInterval(() => {
-        if (gameRunning && !paused) {
-          gameTimer--;
-          if (gameTimer <= 0) {
-            gameTimer = 0;
-            clearInterval(timerInterval);
-            timerInterval = null;
-            $scope.msg = "Time's up!";
-            gameOver();
-          }
-        }
-      }, 1000);
+      // Reset music selection
+      $scope.selectedMusic = null;
 
-      $timeout(function () {
-        $scope.crossLnHit = false;
-        $scope.warn_msg = "";
-      });
-      initializeTrees();
-      initializeHouses();
-      updateBars();
+      // Hide game over modal
       gameOverModal.style.display = "none";
-      animate();
+
+      // Go back to homepage (page 0)
+      $scope.page = 0;
+      $scope.$apply(); // Update Angular scope
+
+      console.log("Game reset - returned to homepage");
     }
 
     $scope.pauseGame = function () {
@@ -1770,7 +1782,14 @@ app.controller(
       }
     }, 8000);
 
-    $scope.page = 1;
+    $scope.page = 0; // Start at homepage
+    $scope.isWin = false; // Track if player won or lost
+
+    // Go from homepage to registration
+    $scope.goToRegister = function() {
+      $scope.page = 1;
+    };
+
     $scope.sound_rep = function () {
       $timeout(function () {
         $scope.sound_rep();
@@ -1829,6 +1848,25 @@ app.controller(
     }
 
     $scope.next = function () {
+      // Validate name
+      if (!$scope.formData.name || $scope.formData.name.trim() === '') {
+        alert('Please enter your name to continue.');
+        return;
+      }
+
+      // Validate phone number
+      if (!$scope.formData.phone || $scope.formData.phone.trim() === '') {
+        alert('Please enter your mobile number to continue.');
+        return;
+      }
+
+      // Validate phone number is exactly 10 digits
+      const phoneDigits = $scope.formData.phone.replace(/\D/g, ''); // Remove non-digits
+      if (phoneDigits.length !== 10) {
+        alert('Mobile number must be exactly 10 digits.');
+        return;
+      }
+
       // Validate terms acceptance
       if (!$scope.formData.termsAccepted) {
         alert('Please accept the Terms & Conditions to continue.');
