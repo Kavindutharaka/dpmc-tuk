@@ -617,28 +617,86 @@ app.controller(
             : itemTypes;
           type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
         } else {
-          // Harder difficulty for non-eligible players
-          // Weighted probabilities: barrier 30%, fuel 20%, genuine 15%, nongenuine 35%
-          if (doubleLineActive || barrierCooldown > 0) {
-            // No barriers during double line or cooldown
-            // Adjusted: fuel 28.5%, genuine 21.5%, nongenuine 50%
-            if (rand < 0.285) {
-              type = "fuel";
-            } else if (rand < 0.5) {
-              type = "genuine";
+          // Non-eligible players: Dynamic difficulty to ensure 70-80 marks before losing
+
+          if (marks < 70) {
+            // Phase 1: Let them reach 70 marks - easier gameplay
+            // More genuine parts, fewer barriers, balanced non-genuine
+            if (doubleLineActive || barrierCooldown > 0) {
+              // No barriers during double line or cooldown
+              // Probabilities: fuel 25%, genuine 40%, nongenuine 35%
+              if (rand < 0.25) {
+                type = "fuel";
+              } else if (rand < 0.65) {
+                type = "genuine"; // Higher genuine parts to help reach 70
+              } else {
+                type = "nongenuine";
+              }
             } else {
-              type = "nongenuine";
+              // Lower barrier rate before 70 marks
+              // Probabilities: barrier 15%, fuel 20%, genuine 40%, nongenuine 25%
+              if (rand < 0.15) {
+                type = "barrier";
+              } else if (rand < 0.35) {
+                type = "fuel";
+              } else if (rand < 0.75) {
+                type = "genuine"; // Higher genuine parts
+              } else {
+                type = "nongenuine";
+              }
+            }
+          } else if (marks < 85) {
+            // Phase 2: 70-85 marks - Dramatically increase difficulty
+            // MUCH higher barrier rate, fewer genuine parts
+            // This is where they should lose with "almost won" feeling
+            if (doubleLineActive || barrierCooldown > 0) {
+              // Even without normal barriers, increase non-genuine parts
+              // Probabilities: fuel 15%, genuine 10%, nongenuine 75%
+              if (rand < 0.15) {
+                type = "fuel";
+              } else if (rand < 0.25) {
+                type = "genuine"; // Very low genuine parts
+              } else {
+                type = "nongenuine"; // High non-genuine to reduce marks
+              }
+            } else {
+              // VERY HIGH barrier rate in this range
+              // Probabilities: barrier 55%, fuel 15%, genuine 10%, nongenuine 20%
+              if (rand < 0.55) {
+                type = "barrier"; // 55% chance of barrier!
+              } else if (rand < 0.70) {
+                type = "fuel";
+              } else if (rand < 0.80) {
+                type = "genuine"; // Very rare
+              } else {
+                type = "nongenuine";
+              }
             }
           } else {
-            // Normal spawn with weighted probabilities
-            if (rand < 0.30) {
-              type = "barrier";
-            } else if (rand < 0.50) {
-              type = "fuel";
-            } else if (rand < 0.65) {
-              type = "genuine";
+            // Phase 3: Above 85 marks - Extremely hard to reach 100
+            // Almost guaranteed barriers to prevent winning
+            if (doubleLineActive || barrierCooldown > 0) {
+              // All non-genuine if can't spawn barriers
+              // Probabilities: fuel 10%, genuine 5%, nongenuine 85%
+              if (rand < 0.10) {
+                type = "fuel";
+              } else if (rand < 0.15) {
+                type = "genuine";
+              } else {
+                type = "nongenuine"; // Almost all non-genuine
+              }
             } else {
-              type = "nongenuine";
+              // EXTREME barrier rate above 85 marks
+              // Probabilities: barrier 70%, fuel 10%, genuine 5%, nongenuine 15%
+              if (rand < 0.70) {
+                type = "barrier"; // 70% chance of barrier!
+              } else if (rand < 0.80) {
+                type = "fuel";
+              } else if (rand < 0.85) {
+                type = "genuine";
+              } else {
+                type = "nongenuine";
+              }
             }
           }
         }
@@ -1362,16 +1420,54 @@ app.controller(
       // Save game data to CSV
       saveGameData();
 
-      // Update win count if player was eligible and achieved 100+ marks
-      if (isEligibleToWin && marks >= 100) {
+      // Show final marks instead of score
+      finalScoreEl.textContent = `Final Marks: ${marks}`;
+      gameOverModal.style.display = "block";
+    }
+
+    // Game win - player survived 60 seconds AND reached 100+ marks
+    function gameWin() {
+      gameRunning = false;
+      paused = true;
+
+      // Stop ALL sounds immediately
+      pauseMusic();
+      tuk_sound.pause();
+      tuk_sound.currentTime = 0;
+
+      // Stop timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      // Clear all notifications and prevent new ones
+      clearNotificationQueue();
+      isShowingNotification = false;
+
+      // Close any open notifications
+      $timeout(function () {
+        $scope.crossLnHit = false;
+        $scope.showAppreciation = false;
+        $scope.showWrongPartAlert = false;
+        $scope.warn_msg = "";
+        yellowLinePaused = false;
+        inSafeRange = false;
+      });
+
+      // Save game data to CSV
+      saveGameData();
+
+      // Update win count if player was eligible
+      if (isEligibleToWin) {
         let gameStats = JSON.parse(localStorage.getItem('gameStats') || '{"totalPlayers":0,"totalWins":0}');
         gameStats.totalWins++;
         localStorage.setItem('gameStats', JSON.stringify(gameStats));
-        console.log(`Player won! Total wins: ${gameStats.totalWins}/${gameStats.totalPlayers}`);
+        console.log(`Player WON! Total wins: ${gameStats.totalWins}/${gameStats.totalPlayers}`);
       }
 
-      // Show final marks instead of score
-      finalScoreEl.textContent = `Final Marks: ${marks}`;
+      // Show final marks with WIN message
+      finalScoreEl.textContent = `YOU WIN! Final Marks: ${marks}`;
       gameOverModal.style.display = "block";
     }
 
@@ -1821,8 +1917,15 @@ app.controller(
               gameTimer = 0;
               clearInterval(timerInterval);
               timerInterval = null;
-              $scope.msg = "Time's up!";
-              gameOver();
+
+              // Win condition: 60 seconds survived AND 100+ marks
+              if (marks >= 100) {
+                $scope.msg = "You Win! Congratulations!";
+                gameWin(); // Player achieved 100+ marks in 60 seconds
+              } else {
+                $scope.msg = "Time's up! You needed 100 marks to win.";
+                gameOver(); // Player survived but didn't reach 100 marks
+              }
             }
           }
         }, 1000);
