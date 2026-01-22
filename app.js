@@ -15,7 +15,16 @@ app.controller(
       phone: "",
       vehicleNumber: "",
       language: "en",
-      termsAccepted: false
+      termsAccepted: true // Default to checked
+    };
+
+    // Terms and conditions modal
+    $scope.showTermsModal = false;
+    $scope.openTermsModal = function() {
+      $scope.showTermsModal = true;
+    };
+    $scope.closeTermsModal = function() {
+      $scope.showTermsModal = false;
     };
 
     // Music selection
@@ -1301,9 +1310,31 @@ app.controller(
         inSafeRange = false;
       });
 
+      // Save game data to CSV
+      saveGameData();
+
       // Show final marks instead of score
       finalScoreEl.textContent = `Final Marks: ${marks}`;
       gameOverModal.style.display = "block";
+    }
+
+    // Save game data to CSV via PHP
+    function saveGameData() {
+      const gameData = {
+        name: $scope.formData.name || "Anonymous",
+        phone: $scope.formData.phone || "N/A",
+        score: marks,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString()
+      };
+
+      $http.post('save_game_data.php', gameData)
+        .then(function(response) {
+          console.log('Game data saved successfully:', response.data);
+        })
+        .catch(function(error) {
+          console.error('Error saving game data:', error);
+        });
     }
 
     function resetGame() {
