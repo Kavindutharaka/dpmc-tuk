@@ -416,6 +416,13 @@
       border: 3px solid rgba(255, 68, 68, 0.5);
     }
 
+    #gameOverModal.win-modal {
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8),
+                  inset 0 0 50px rgba(76, 175, 80, 0.3);
+      border: 3px solid rgba(76, 175, 80, 0.7);
+      background: linear-gradient(135deg, rgba(10, 40, 10, 0.95) 0%, rgba(20, 60, 20, 0.95) 100%);
+    }
+
     #gameOverModal h2 {
       margin: 0 0 50px 0;
       color: #ff4444;
@@ -424,6 +431,18 @@
       text-shadow: 0 8px 20px rgba(255, 68, 68, 0.8),
                    0 0 40px rgba(255, 68, 68, 0.5);
       animation: gameOverPulse 1.5s ease-in-out infinite;
+    }
+
+    #gameOverModal.win-modal h2 {
+      color: #4caf50;
+      text-shadow: 0 8px 20px rgba(76, 175, 80, 0.8),
+                   0 0 40px rgba(76, 175, 80, 0.5);
+      animation: winPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes winPulse {
+      0%, 100% { transform: scale(1); text-shadow: 0 8px 20px rgba(76, 175, 80, 0.8); }
+      50% { transform: scale(1.05); text-shadow: 0 8px 30px rgba(76, 175, 80, 1); }
     }
 
     @keyframes gameOverPulse {
@@ -817,11 +836,84 @@
       transform: translateY(-3px);
       box-shadow: 0 15px 40px rgba(52, 152, 219, 0.7);
     }
+
+    /* Homepage styles (page 0) */
+    .homepage {
+      position: relative;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
+      color: white;
+      padding: 200px 60px;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 100px rgba(0, 100, 255, 0.2);
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .homepage-logo {
+      width: 350px;
+      height: 350px;
+      margin-bottom: 120px;
+      filter: drop-shadow(0 15px 40px rgba(52, 152, 219, 0.6));
+      animation: float 3s ease-in-out infinite;
+      transform: translateZ(50px);
+    }
+
+    .play-button {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+      border: none;
+      padding: 50px 120px;
+      font-size: 60px;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 20px 50px rgba(76, 175, 80, 0.6),
+                  inset 0 -3px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+      transform: translateZ(60px);
+      animation: buttonPulse 2s ease-in-out infinite;
+    }
+
+    .play-button:hover {
+      background: linear-gradient(135deg, #5bc75f 0%, #50b653 100%);
+      transform: translateZ(70px) scale(1.05);
+      box-shadow: 0 25px 60px rgba(76, 175, 80, 0.8);
+    }
+
+    .play-button:active {
+      transform: translateZ(50px) scale(0.98);
+      box-shadow: 0 15px 40px rgba(76, 175, 80, 0.5);
+    }
+
+    @keyframes buttonPulse {
+      0%, 100% { box-shadow: 0 20px 50px rgba(76, 175, 80, 0.6); }
+      50% { box-shadow: 0 25px 60px rgba(76, 175, 80, 0.8); }
+    }
   </style>
 </head>
 
 <body oncontextmenu="return false" onselectstart="return false" ondragstart="return false" ng-app="app"
   ng-controller="HomeCtrl">
+
+  <!-- Homepage (page 0) -->
+  <div ng-show="page == 0">
+    <div class="game-wrapper">
+      <div class="homepage">
+        <img class="homepage-logo" src="logo.jpeg" alt="Game Logo" />
+        <button class="play-button" ng-click="goToRegister()">PLAY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registration Page (page 1) -->
   <div ng-show="page == 1">
     <div class="game-wrapper">
       <div id="user_form">
@@ -921,11 +1013,12 @@
         </div>
 
         <canvas id="gameCanvas"></canvas>
-        <div id="gameOverModal">
-          <h2>GAME OVER!</h2>
+        <div id="gameOverModal" ng-class="{'win-modal': isWin}">
+          <h2 ng-if="isWin">🏆 YOU WIN! 🏆</h2>
+          <h2 ng-if="!isWin">GAME OVER!</h2>
           <p>{{msg}}</p>
           <p id="finalScore">Final Score: 0000</p>
-          <button id="tryAgainBtn">Try Again</button>
+          <button id="tryAgainBtn">Play Again</button>
         </div>
         <div ng-show="crossLnHit" class="gameOverModal">
           <h2>Warning!</h2>
