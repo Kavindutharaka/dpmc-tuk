@@ -1657,43 +1657,35 @@ app.controller(
 
       // Check if click is within tuk area (including margin)
       if (clickX >= tukLeft && clickX <= tukRight && clickY >= tukTop && clickY <= tukBottom) {
-        // Click is inside tuk area - determine which LANE was clicked (not which side of tuk)
-        // Use canvas center to determine lane, not tuk center
+        // Click on tuk = toggle to opposite lane (simple toggle behavior)
         let targetLane;
-        const roadCenterX = canvas.width / 2; // 540px for 1080px canvas
 
-        if (clickX < roadCenterX) {
-          targetLane = "left";
+        if (tuk.targetLane === "left") {
+          targetLane = "right"; // Switch to right if currently left
         } else {
-          targetLane = "right";
+          targetLane = "left"; // Switch to left if currently right
         }
 
-        console.log(`Click detected at (${Math.round(clickX)}, ${Math.round(clickY)}) - Tuk at ${Math.round(tuk.x)} - Target: ${targetLane}, Current: ${tuk.targetLane}`);
+        console.log(`✓ Tuk clicked at (${Math.round(clickX)}, ${Math.round(clickY)}) - Switching from ${tuk.targetLane} to ${targetLane} lane`);
 
-        // Always allow lane switch (no restriction on targetLane)
-        if (targetLane !== tuk.targetLane) {
-          // Check if crossing double line
-          if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
-            doubleLineLogged = true;
-            showNotification('warning', 'You crossed the Double line!!!', null, 2000);
-            console.log("You cross Double line!!!");
-          }
-
-          // Check yellow line violation
-          if (yellowLinePaused && !isShowingNotification) {
-            showNotification('warning', 'You need to stop Vehicle!', null, 2000);
-            $timeout(function () {
-              yellowLinePaused = false;
-              inSafeRange = false;
-            }, 2000);
-          }
-
-          // Switch to target lane immediately
-          tuk.targetLane = targetLane;
-          console.log(`✓ Lane switch: ${tuk.targetLane} lane`);
-        } else {
-          console.log(`Already targeting ${targetLane} lane - no change`);
+        // Check if crossing double line
+        if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
+          doubleLineLogged = true;
+          showNotification('warning', 'You crossed the Double line!!!', null, 2000);
+          console.log("You cross Double line!!!");
         }
+
+        // Check yellow line violation
+        if (yellowLinePaused && !isShowingNotification) {
+          showNotification('warning', 'You need to stop Vehicle!', null, 2000);
+          $timeout(function () {
+            yellowLinePaused = false;
+            inSafeRange = false;
+          }, 2000);
+        }
+
+        // Switch to opposite lane
+        tuk.targetLane = targetLane;
       } else {
         console.log(`Click outside tuk area at (${Math.round(clickX)}, ${Math.round(clickY)}) - Tuk bounds: ${Math.round(tukLeft)}-${Math.round(tukRight)}, ${Math.round(tukTop)}-${Math.round(tukBottom)}`);
       }
