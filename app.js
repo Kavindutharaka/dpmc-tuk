@@ -1637,6 +1637,46 @@ app.controller(
       }
     });
 
+    // Click event for Windows kiosk (mouse click instead of touch swipe)
+    canvas.addEventListener("click", (event) => {
+      if (!gameRunning || paused) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const centerX = canvas.width / 2;
+
+      // Determine which lane was clicked
+      let targetLane;
+      if (clickX < centerX) {
+        targetLane = "left";
+      } else {
+        targetLane = "right";
+      }
+
+      // Only switch if clicking different lane than current target
+      if (targetLane !== tuk.targetLane) {
+        // Check if crossing double line
+        if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
+          doubleLineLogged = true;
+          showNotification('warning', 'You crossed the Double line!!!', null, 2000);
+          console.log("You cross Double line!!!");
+        }
+
+        // Check yellow line violation
+        if (yellowLinePaused && !isShowingNotification) {
+          showNotification('warning', 'You need to stop Vehicle!', null, 2000);
+          $timeout(function () {
+            yellowLinePaused = false;
+            inSafeRange = false;
+          }, 2000);
+        }
+
+        // Switch to target lane
+        tuk.targetLane = targetLane;
+        console.log(`Clicked ${clickX < centerX ? 'left' : 'right'} side - moving to ${targetLane} lane`);
+      }
+    });
+
     tryAgainBtn.addEventListener("click", resetGame);
 
     document.addEventListener('keydown', (event) => {
