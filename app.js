@@ -1657,20 +1657,20 @@ app.controller(
 
       // Check if click is within tuk area (including margin)
       if (clickX >= tukLeft && clickX <= tukRight && clickY >= tukTop && clickY <= tukBottom) {
-        // Click is inside tuk area - determine which side of tuk was clicked
+        // Click is inside tuk area - determine which LANE was clicked (not which side of tuk)
+        // Use canvas center to determine lane, not tuk center
         let targetLane;
-        const tukCenterX = tuk.x;
+        const roadCenterX = canvas.width / 2; // 540px for 1080px canvas
 
-        if (clickX < tukCenterX) {
+        if (clickX < roadCenterX) {
           targetLane = "left";
         } else {
           targetLane = "right";
         }
 
-        console.log(`Click detected at (${Math.round(clickX)}, ${Math.round(clickY)}) - Target: ${targetLane}, Current: ${tuk.targetLane}`);
+        console.log(`Click detected at (${Math.round(clickX)}, ${Math.round(clickY)}) - Tuk at ${Math.round(tuk.x)} - Target: ${targetLane}, Current: ${tuk.targetLane}`);
 
         // Always allow lane switch (no restriction on targetLane)
-        // This fixes the issue where second clicks don't work
         if (targetLane !== tuk.targetLane) {
           // Check if crossing double line
           if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
@@ -1695,7 +1695,7 @@ app.controller(
           console.log(`Already targeting ${targetLane} lane - no change`);
         }
       } else {
-        console.log(`Click outside tuk area at (${Math.round(clickX)}, ${Math.round(clickY)})`);
+        console.log(`Click outside tuk area at (${Math.round(clickX)}, ${Math.round(clickY)}) - Tuk bounds: ${Math.round(tukLeft)}-${Math.round(tukRight)}, ${Math.round(tukTop)}-${Math.round(tukBottom)}`);
       }
     });
 
