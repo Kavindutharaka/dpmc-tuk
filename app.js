@@ -1849,6 +1849,56 @@ app.controller(
       $scope.page = 1;
     };
 
+    // Custom keyboard functionality
+    $scope.currentKeyboardType = null;
+    $scope.currentInputField = null;
+
+    $scope.showKeyboard = function(type) {
+      $scope.currentKeyboardType = type;
+
+      if (type === 'text') {
+        $scope.currentInputField = 'name';
+        document.getElementById('textKeyboard').classList.add('active');
+        document.getElementById('numberKeyboard').classList.remove('active');
+      } else if (type === 'number') {
+        $scope.currentInputField = 'phone';
+        document.getElementById('numberKeyboard').classList.add('active');
+        document.getElementById('textKeyboard').classList.remove('active');
+      }
+    };
+
+    $scope.hideKeyboard = function() {
+      document.getElementById('textKeyboard').classList.remove('active');
+      document.getElementById('numberKeyboard').classList.remove('active');
+      $scope.currentKeyboardType = null;
+      $scope.currentInputField = null;
+    };
+
+    $scope.keyPress = function(key) {
+      if (!$scope.currentInputField) return;
+
+      if ($scope.currentInputField === 'name') {
+        $scope.formData.name = ($scope.formData.name || '') + key;
+      } else if ($scope.currentInputField === 'phone') {
+        // Limit phone number to 10 digits
+        if ($scope.formData.phone.length < 10) {
+          $scope.formData.phone = ($scope.formData.phone || '') + key;
+        }
+      }
+      $scope.$apply();
+    };
+
+    $scope.keyBackspace = function() {
+      if (!$scope.currentInputField) return;
+
+      if ($scope.currentInputField === 'name') {
+        $scope.formData.name = $scope.formData.name.slice(0, -1);
+      } else if ($scope.currentInputField === 'phone') {
+        $scope.formData.phone = $scope.formData.phone.slice(0, -1);
+      }
+      $scope.$apply();
+    };
+
     $scope.sound_rep = function () {
       $timeout(function () {
         $scope.sound_rep();

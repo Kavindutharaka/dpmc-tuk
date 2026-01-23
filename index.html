@@ -887,6 +887,157 @@
       0%, 100% { box-shadow: 0 20px 50px rgba(76, 175, 80, 0.6); }
       50% { box-shadow: 0 25px 60px rgba(76, 175, 80, 0.8); }
     }
+
+    /* Custom On-Screen Keyboards */
+    .keyboard-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      z-index: 9999;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 50px;
+    }
+
+    .keyboard-overlay.active {
+      display: flex;
+    }
+
+    .keyboard-container {
+      background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(0, 0, 0, 0.98) 100%);
+      border-radius: 20px 20px 0 0;
+      padding: 30px;
+      box-shadow: 0 -10px 50px rgba(52, 152, 219, 0.4);
+      border: 2px solid rgba(52, 152, 219, 0.3);
+      max-width: 1000px;
+      width: 90%;
+    }
+
+    .keyboard-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      justify-content: center;
+    }
+
+    .keyboard-key {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      border: none;
+      padding: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      border-radius: 10px;
+      min-width: 70px;
+      min-height: 70px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.1s;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .keyboard-key:hover {
+      background: linear-gradient(135deg, #52b8ff 0%, #3498db 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(52, 152, 219, 0.5);
+    }
+
+    .keyboard-key:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .keyboard-key.space {
+      min-width: 400px;
+    }
+
+    .keyboard-key.backspace,
+    .keyboard-key.done {
+      min-width: 120px;
+    }
+
+    .keyboard-key.done {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    }
+
+    .keyboard-key.done:hover {
+      background: linear-gradient(135deg, #5bc75f 0%, #50b653 100%);
+    }
+
+    .keyboard-key.backspace {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+
+    .keyboard-key.backspace:hover {
+      background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%);
+    }
+
+    /* Number Pad Styles */
+    .numpad-container {
+      background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(0, 0, 0, 0.98) 100%);
+      border-radius: 20px 20px 0 0;
+      padding: 30px;
+      box-shadow: 0 -10px 50px rgba(52, 152, 219, 0.4);
+      border: 2px solid rgba(52, 152, 219, 0.3);
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .numpad-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+
+    .numpad-key {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      border: none;
+      padding: 30px;
+      font-size: 36px;
+      font-weight: bold;
+      border-radius: 15px;
+      width: 120px;
+      height: 100px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.1s;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .numpad-key:hover {
+      background: linear-gradient(135deg, #52b8ff 0%, #3498db 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(52, 152, 219, 0.5);
+    }
+
+    .numpad-key:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .numpad-key.done {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      width: 100%;
+    }
+
+    .numpad-key.done:hover {
+      background: linear-gradient(135deg, #5bc75f 0%, #50b653 100%);
+    }
+
+    .numpad-key.backspace {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      width: 100%;
+    }
+
+    .numpad-key.backspace:hover {
+      background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%);
+    }
   </style>
 </head>
 
@@ -912,10 +1063,10 @@
         </div>
         <div class="user-form-details">
           <label class="form-label">Name</label>
-          <input type="text" class="form-input" ng-model="formData.name" />
+          <input type="text" id="nameInput" class="form-input" ng-model="formData.name" ng-focus="showKeyboard('text')" readonly />
 
           <label class="form-label">Mobile Number</label>
-          <input type="text" class="form-input" ng-model="formData.phone" />
+          <input type="text" id="phoneInput" class="form-input" ng-model="formData.phone" ng-focus="showKeyboard('number')" readonly maxlength="10" />
 
           <div class="terms-container">
             <input type="checkbox" class="terms-checkbox" id="termsCheckbox" ng-model="formData.termsAccepted" />
@@ -1031,6 +1182,79 @@
           <div class="success-icon">✓</div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom QWERTY Keyboard -->
+  <div id="textKeyboard" class="keyboard-overlay" ng-click="hideKeyboard()">
+    <div class="keyboard-container" ng-click="$event.stopPropagation()">
+      <div class="keyboard-row">
+        <button class="keyboard-key" ng-click="keyPress('Q')">Q</button>
+        <button class="keyboard-key" ng-click="keyPress('W')">W</button>
+        <button class="keyboard-key" ng-click="keyPress('E')">E</button>
+        <button class="keyboard-key" ng-click="keyPress('R')">R</button>
+        <button class="keyboard-key" ng-click="keyPress('T')">T</button>
+        <button class="keyboard-key" ng-click="keyPress('Y')">Y</button>
+        <button class="keyboard-key" ng-click="keyPress('U')">U</button>
+        <button class="keyboard-key" ng-click="keyPress('I')">I</button>
+        <button class="keyboard-key" ng-click="keyPress('O')">O</button>
+        <button class="keyboard-key" ng-click="keyPress('P')">P</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="keyboard-key" ng-click="keyPress('A')">A</button>
+        <button class="keyboard-key" ng-click="keyPress('S')">S</button>
+        <button class="keyboard-key" ng-click="keyPress('D')">D</button>
+        <button class="keyboard-key" ng-click="keyPress('F')">F</button>
+        <button class="keyboard-key" ng-click="keyPress('G')">G</button>
+        <button class="keyboard-key" ng-click="keyPress('H')">H</button>
+        <button class="keyboard-key" ng-click="keyPress('J')">J</button>
+        <button class="keyboard-key" ng-click="keyPress('K')">K</button>
+        <button class="keyboard-key" ng-click="keyPress('L')">L</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="keyboard-key" ng-click="keyPress('Z')">Z</button>
+        <button class="keyboard-key" ng-click="keyPress('X')">X</button>
+        <button class="keyboard-key" ng-click="keyPress('C')">C</button>
+        <button class="keyboard-key" ng-click="keyPress('V')">V</button>
+        <button class="keyboard-key" ng-click="keyPress('B')">B</button>
+        <button class="keyboard-key" ng-click="keyPress('N')">N</button>
+        <button class="keyboard-key" ng-click="keyPress('M')">M</button>
+        <button class="keyboard-key backspace" ng-click="keyBackspace()">⌫</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="keyboard-key space" ng-click="keyPress(' ')">SPACE</button>
+        <button class="keyboard-key done" ng-click="hideKeyboard()">DONE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Number Pad -->
+  <div id="numberKeyboard" class="keyboard-overlay" ng-click="hideKeyboard()">
+    <div class="numpad-container" ng-click="$event.stopPropagation()">
+      <div class="numpad-row">
+        <button class="numpad-key" ng-click="keyPress('1')">1</button>
+        <button class="numpad-key" ng-click="keyPress('2')">2</button>
+        <button class="numpad-key" ng-click="keyPress('3')">3</button>
+      </div>
+      <div class="numpad-row">
+        <button class="numpad-key" ng-click="keyPress('4')">4</button>
+        <button class="numpad-key" ng-click="keyPress('5')">5</button>
+        <button class="numpad-key" ng-click="keyPress('6')">6</button>
+      </div>
+      <div class="numpad-row">
+        <button class="numpad-key" ng-click="keyPress('7')">7</button>
+        <button class="numpad-key" ng-click="keyPress('8')">8</button>
+        <button class="numpad-key" ng-click="keyPress('9')">9</button>
+      </div>
+      <div class="numpad-row">
+        <button class="numpad-key" ng-click="keyPress('0')">0</button>
+      </div>
+      <div class="numpad-row">
+        <button class="numpad-key backspace" ng-click="keyBackspace()">⌫ DELETE</button>
+      </div>
+      <div class="numpad-row">
+        <button class="numpad-key done" ng-click="hideKeyboard()">DONE</button>
       </div>
     </div>
   </div>
