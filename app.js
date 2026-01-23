@@ -1639,7 +1639,7 @@ app.controller(
     });
 
     // Click event for Windows kiosk (mouse click instead of touch swipe)
-    // Only responds to clicks within the tuk area
+    // Only responds to clicks within the tuk area (with margin for easier clicking)
     canvas.addEventListener("click", (event) => {
       if (!gameRunning || paused) return;
 
@@ -1647,13 +1647,16 @@ app.controller(
       const clickX = event.clientX - rect.left;
       const clickY = event.clientY - rect.top;
 
-      // Calculate tuk bounds
-      const tukLeft = tuk.x - tuk.width / 2;
-      const tukRight = tuk.x + tuk.width / 2;
-      const tukTop = tuk.y - tuk.height / 2;
-      const tukBottom = tuk.y + tuk.height / 2;
+      // Add margin around tuk for easier clicking (50px on all sides)
+      const clickMargin = 50;
 
-      // Check if click is within tuk area
+      // Calculate tuk bounds with extra margin
+      const tukLeft = tuk.x - tuk.width / 2 - clickMargin;
+      const tukRight = tuk.x + tuk.width / 2 + clickMargin;
+      const tukTop = tuk.y - tuk.height / 2 - clickMargin;
+      const tukBottom = tuk.y + tuk.height / 2 + clickMargin;
+
+      // Check if click is within tuk area (including margin)
       if (clickX >= tukLeft && clickX <= tukRight && clickY >= tukTop && clickY <= tukBottom) {
         // Click is inside tuk area - determine which side of tuk was clicked
         let targetLane;
@@ -1665,7 +1668,10 @@ app.controller(
           targetLane = "right";
         }
 
-        // Only switch if clicking different lane than current target
+        console.log(`Click detected at (${Math.round(clickX)}, ${Math.round(clickY)}) - Target: ${targetLane}, Current: ${tuk.targetLane}`);
+
+        // Always allow lane switch (no restriction on targetLane)
+        // This fixes the issue where second clicks don't work
         if (targetLane !== tuk.targetLane) {
           // Check if crossing double line
           if (doubleLineActive && !doubleLineLogged && !isShowingNotification) {
@@ -1683,10 +1689,14 @@ app.controller(
             }, 2000);
           }
 
-          // Switch to target lane
+          // Switch to target lane immediately
           tuk.targetLane = targetLane;
-          console.log(`Clicked ${clickX < tukCenterX ? 'left' : 'right'} side of tuk - moving to ${targetLane} lane`);
+          console.log(`✓ Lane switch: ${tuk.targetLane} lane`);
+        } else {
+          console.log(`Already targeting ${targetLane} lane - no change`);
         }
+      } else {
+        console.log(`Click outside tuk area at (${Math.round(clickX)}, ${Math.round(clickY)})`);
       }
     });
 
