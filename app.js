@@ -1910,26 +1910,26 @@ app.controller(
     $scope.next = function () {
       // Validate name
       if (!$scope.formData.name || $scope.formData.name.trim() === '') {
-        alert('Please enter your name to continue.');
+        // alert('Please enter your name to continue.');
         return;
       }
 
       // Validate phone number
       if (!$scope.formData.phone || $scope.formData.phone.trim() === '') {
-        alert('Please enter your mobile number to continue.');
+        // alert('Please enter your mobile number to continue.');
         return;
       }
 
       // Validate phone number is exactly 10 digits
       const phoneDigits = $scope.formData.phone.replace(/\D/g, ''); // Remove non-digits
       if (phoneDigits.length !== 10) {
-        alert('Mobile number must be exactly 10 digits.');
+        // alert('Mobile number must be exactly 10 digits.');
         return;
       }
 
       // Validate terms acceptance
       if (!$scope.formData.termsAccepted) {
-        alert('Please accept the Terms & Conditions to continue.');
+        // alert('Please accept the Terms & Conditions to continue.');
         return;
       }
 
@@ -1941,7 +1941,7 @@ app.controller(
     // Start game after music selection
     $scope.startGame = function () {
       if ($scope.selectedMusic === null) {
-        alert('Please select a music option to continue.');
+        // alert('Please select a music option to continue.');
         return;
       }
 
